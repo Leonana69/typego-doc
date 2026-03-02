@@ -36,7 +36,9 @@
       position: sticky;
       top: 0;
       z-index: 100;
-      background: #161b22;
+      background: rgba(22, 27, 34, 0.85);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-bottom: 1px solid #30363d;
       padding: 0 24px;
     }
@@ -45,7 +47,7 @@
       list-style: none;
       display: flex;
       gap: 24px;
-      max-width: 960px;
+      max-width: 1080px;
       margin: 0 auto;
       padding: 12px 0;
     }
@@ -65,30 +67,42 @@
 
     /* ── Sections ── */
     section {
-      max-width: 960px;
+      max-width: 1080px;
       margin: 0 auto;
       padding: 64px 24px;
     }
 
     h2 {
-      color: #58a6ff;
+      color: #f0f6fc;
       font-size: 1.75rem;
-      margin-bottom: 24px;
-      padding-bottom: 8px;
-      border-bottom: 1px solid #21262d;
+      margin-bottom: 16px;
     }
 
     /* ── Hero ── */
     .hero {
       text-align: center;
       padding: 100px 24px 80px;
+      position: relative;
+    }
+
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(88, 166, 255, 0.08) 0%, transparent 70%);
+      pointer-events: none;
     }
 
     .hero h1 {
-      font-size: 3.5rem;
+      font-size: 4rem;
       font-weight: 800;
       color: #f0f6fc;
       letter-spacing: -0.02em;
+      position: relative;
     }
 
     .hero h1 span {
@@ -96,7 +110,7 @@
     }
 
     .hero .subtitle {
-      font-size: 1.25rem;
+      font-size: 1.35rem;
       color: #8b949e;
       margin-top: 12px;
     }
@@ -105,16 +119,209 @@
       margin-top: 24px;
       font-size: 1.05rem;
       color: #c9d1d9;
-      max-width: 600px;
+      max-width: 620px;
       margin-left: auto;
       margin-right: auto;
+    }
+
+    .hero-highlights {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 32px;
+    }
+
+    .hero-highlights .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 16px;
+      border-radius: 999px;
+      background: rgba(88, 166, 255, 0.08);
+      border: 1px solid rgba(88, 166, 255, 0.25);
+      color: #79c0ff;
+      font-size: 0.85rem;
+      font-weight: 500;
+    }
+
+    .pill svg {
+      width: 14px;
+      height: 14px;
+      flex-shrink: 0;
     }
 
     /* ── Overview ── */
     .overview p {
       font-size: 1.05rem;
-      max-width: 720px;
+      max-width: 780px;
       color: #c9d1d9;
+    }
+
+    .overview h2 {
+      padding-bottom: 8px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    /* ── Problem Section ── */
+    .problem-section {
+      background: #0d1117;
+    }
+
+    .problem-section h2 {
+      color: #f0f6fc;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #21262d;
+    }
+
+    .problem-intro {
+      font-size: 1.05rem;
+      color: #8b949e;
+      margin-bottom: 24px;
+      max-width: 720px;
+    }
+
+    .drawback-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 32px;
+      max-width: 780px;
+    }
+
+    .drawback-list li {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 8px;
+      background: rgba(248, 81, 73, 0.04);
+      border: 1px solid rgba(248, 81, 73, 0.12);
+      font-size: 0.95rem;
+      color: #8b949e;
+    }
+
+    .drawback-list li strong {
+      color: #f85149;
+      white-space: nowrap;
+    }
+
+    .drawback-icon {
+      flex-shrink: 0;
+      width: 20px;
+      height: 20px;
+      margin-top: 2px;
+      color: #f85149;
+    }
+
+    /* ── Solution / Advantages Section ── */
+    .solution-section {
+      background: linear-gradient(180deg, #0d1117 0%, #0f1922 100%);
+      padding-bottom: 80px;
+    }
+
+    .solution-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+
+    .solution-header h2 {
+      font-size: 2rem;
+      color: #f0f6fc;
+      border: none;
+      padding: 0;
+    }
+
+    .solution-header h2 span {
+      color: #58a6ff;
+    }
+
+    .solution-header p {
+      font-size: 1.05rem;
+      color: #8b949e;
+      margin-top: 8px;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .advantage-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 20px;
+      margin-bottom: 48px;
+    }
+
+    .advantage-card {
+      background: #161b22;
+      border: 1px solid #30363d;
+      border-radius: 12px;
+      padding: 24px;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .advantage-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #58a6ff, #388bfd);
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+
+    .advantage-card:hover {
+      border-color: #58a6ff;
+      box-shadow: 0 4px 24px rgba(88, 166, 255, 0.08);
+    }
+
+    .advantage-card:hover::before {
+      opacity: 1;
+    }
+
+    .advantage-card .card-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      background: rgba(88, 166, 255, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .advantage-card .card-icon svg {
+      width: 20px;
+      height: 20px;
+      color: #58a6ff;
+    }
+
+    .advantage-card h3 {
+      color: #f0f6fc;
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+    }
+
+    .advantage-card p {
+      color: #8b949e;
+      font-size: 0.9rem;
+      line-height: 1.55;
+    }
+
+    /* Highlight card for the full-width 5th advantage */
+    .advantage-card.highlight {
+      border-color: rgba(88, 166, 255, 0.3);
+      background: linear-gradient(135deg, #161b22 0%, #121d2f 100%);
+    }
+
+    .advantage-card.highlight::before {
+      opacity: 1;
     }
 
     /* ── System Diagram ── */
@@ -139,6 +346,15 @@
       margin-top: 12px;
       font-size: 0.85rem;
       color: #484f58;
+    }
+
+    .diagram-wrapper {
+      margin-top: 8px;
+    }
+
+    .solution-diagram .diagram-container {
+      border-color: rgba(88, 166, 255, 0.2);
+      background: linear-gradient(135deg, #161b22 0%, #121d2f 100%);
     }
 
     /* ── Demo Videos ── */
@@ -208,6 +424,12 @@
       font-size: 0.85rem;
     }
 
+    #demos h2 {
+      padding-bottom: 8px;
+      border-bottom: 1px solid #21262d;
+      margin-bottom: 24px;
+    }
+
     /* ── Footer ── */
     footer {
       border-top: 1px solid #21262d;
@@ -224,7 +446,7 @@
     /* ── Responsive ── */
     @media (max-width: 600px) {
       .hero h1 {
-        font-size: 2.25rem;
+        font-size: 2.5rem;
       }
 
       .hero .subtitle {
@@ -239,6 +461,18 @@
         gap: 16px;
         padding: 10px 0;
       }
+
+      .advantage-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero-highlights {
+        gap: 8px;
+      }
+
+      .solution-header h2 {
+        font-size: 1.6rem;
+      }
     }
   </style>
 </head>
@@ -247,8 +481,9 @@
   <!-- Navigation -->
   <nav>
     <ul>
-      <li><a href="#overview">Overview</a></li>
-      <li><a href="#diagram">Diagram</a></li>
+      <!-- <li><a href="#overview">Overview</a></li> -->
+      <li><a href="#problem">Problem</a></li>
+      <li><a href="#solution">Our Solution</a></li>
       <li><a href="#demos">Demos</a></li>
     </ul>
   </nav>
@@ -258,241 +493,316 @@
     <h1>Type<span>Go</span></h1>
     <p class="subtitle">Give Your Robot a Personality</p>
     <p class="tagline">Translate natural language stories into robot personalities and behaviors — powered by asynchronous LLM agents that convert narratives into internal configurations to control how your robot acts.</p>
+    <div class="hero-highlights">
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        Low-Latency Execution
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Non-Blocking Pipeline
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+        Speculative Pipelining
+      </span>
+      <span class="pill">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        Multi-Task Concurrency
+      </span>
+    </div>
   </section>
 
   <!-- Overview -->
-  <section id="overview" class="overview">
+  <!-- <section id="overview" class="overview">
     <h2>Overview</h2>
     <p>
-      TypeGo is a multi-layer planning and control system that enables quadruped robot dogs to understand and execute complex natural language instructions autonomously. Built on a hierarchical architecture spanning reactive event handling, speculative action pipelining, task decomposition, and priority-based scheduling, TypeGo leverages large language models to translate high-level commands into real-time robot actions with continuous observation-driven replanning. The system integrates ROS 2 for robot communication, YOLO for visual object detection, and a modular observation framework combining pose estimation, scene graphs, and SLAM mapping to maintain situational awareness.
+      TypeGo is a multi-layer planning and control system that enables quadruped robot dogs to understand and execute complex natural language instructions autonomously. Built on a hierarchical architecture spanning reactive event handling, speculative action pipelining, task decomposition, and priority-based scheduling, TypeGo leverages large language models to translate high-level commands into real-time robot actions with continuous observation-driven replanning. The system integrates ROS2 for robot communication, YOLO for visual object detection, and a modular observation framework combining pose estimation, scene graphs, and SLAM mapping to maintain situational awareness.
     </p>
-    <!-- Replace the paragraph above with your own project description. -->
+  </section> -->
+
+  <!-- Problem Section -->
+  <section id="problem" class="problem-section">
+    <h2>The Problem: Typical LLM-Based Control Loop</h2>
+    <p class="problem-intro">
+      The standard LLM-based robot planning and control loop is straightforward but suffers from
+      fundamental limitations that prevent real-time, adaptive robot behavior:
+    </p>
+    <ul class="drawback-list">
+      <li>
+        <svg class="drawback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div><strong>High latency:</strong> The robot must wait for a full LLM inference cycle before executing any action, making real-time responsiveness difficult.</div>
+      </li>
+      <li>
+        <svg class="drawback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div><strong>Blocking execution:</strong> The entire pipeline stalls during LLM inference — the robot cannot react to new observations or interrupts mid-cycle.</div>
+      </li>
+      <li>
+        <svg class="drawback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div><strong>No speculative execution:</strong> Actions cannot be pre-fetched or pipelined; the robot remains idle while the model is thinking.</div>
+      </li>
+      <li>
+        <svg class="drawback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div><strong>Sequential, single-threaded planning:</strong> Only one planning request is processed at a time, preventing concurrent handling of multiple tasks or goals.</div>
+      </li>
+      <li>
+        <svg class="drawback-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></svg>
+        <div><strong>Context window bottleneck:</strong> All observations, memory, and system descriptions must be packed into a single LLM prompt, limiting the richness of state that can be represented.</div>
+      </li>
+    </ul>
+
+    <div class="diagram-wrapper">
+      <div class="diagram-container">
+        <svg viewBox="0 0 770 300" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3"
+                    markerWidth="10" markerHeight="6" orient="auto-start-reverse">
+              <path d="M0,0 L10,3 L0,6 Z" fill="#58a6ff"/>
+            </marker>
+          </defs>
+
+          <!-- Input Task -->
+          <rect x="15" y="25" width="120" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="75" y="72" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="16" font-weight="600">Input Task</text>
+
+          <!-- Box 1: Observation / Memory / System Desc., etc. -->
+          <rect x="175" y="25" width="250" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="16" font-weight="600">
+            <tspan x="300" y="58">Observation / Memory /</tspan>
+            <tspan x="300" dy="22">System Desc., etc.</tspan>
+          </text>
+
+          <!-- Box 2: LLM -->
+          <rect x="475" y="25" width="110" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="530" y="72" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">LLM</text>
+
+          <!-- Box 3: Plan -->
+          <rect x="635" y="25" width="110" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="690" y="72" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">Plan</text>
+
+          <!-- Box 4: Robot -->
+          <rect x="460" y="200" width="130" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="525" y="247" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">Robot</text>
+
+          <!-- Arrow: Input Task → Observation -->
+          <line x1="135" y1="65" x2="175" y2="65"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Arrow 1: Observation → LLM -->
+          <line x1="425" y1="65" x2="475" y2="65"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Arrow 2: LLM → Plan -->
+          <line x1="585" y1="65" x2="635" y2="65"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Arrow 3: Plan → Robot (down then left) -->
+          <path d="M690,105 L690,240 L590,240" fill="none"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+
+          <!-- Arrow 4: Robot → Observation (left then up) -->
+          <path d="M460,240 L300,240 L300,105" fill="none"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
+        </svg>
+      </div>
+      <p class="diagram-caption">Figure 1 — Typical LLM-based robot planning and control loop</p>
+    </div>
   </section>
 
-  <!-- System Diagram -->
-  <section id="diagram">
-    <h2>Typical LLM-based robot planning and control loop</h2>
-    <p>
-      This is a typical LLM-based robot planning and control loop. While straightforward,
-      it comes with several notable drawbacks:
-    </p>
-    <ol>
-      <li><strong>High latency:</strong> The robot must wait for a full LLM inference cycle before executing any action, making real-time responsiveness difficult.</li>
-      <li><strong>Blocking execution:</strong> The entire pipeline stalls during LLM inference — the robot cannot react to new observations or interrupts mid-cycle.</li>
-      <li><strong>No speculative execution:</strong> Actions cannot be pre-fetched or pipelined; the robot remains idle while the model is thinking.</li>
-      <li><strong>Sequential, single-threaded planning:</strong> Only one planning request is processed at a time, preventing concurrent handling of multiple tasks or goals.</li>
-      <li><strong>Context window bottleneck:</strong> All observations, memory, and system descriptions must be packed into a single LLM prompt, limiting the richness of state that can be represented.</li>
-    </ol>
-    <div class="diagram-container">
-      <svg viewBox="0 0 770 300" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3"
-                  markerWidth="10" markerHeight="6" orient="auto-start-reverse">
-            <path d="M0,0 L10,3 L0,6 Z" fill="#58a6ff"/>
-          </marker>
-        </defs>
-
-        <!-- Input Task -->
-        <rect x="15" y="25" width="120" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="75" y="72" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="16" font-weight="600">Input Task</text>
-
-        <!-- Box 1: Observation / Memory / System Desc., etc. -->
-        <rect x="175" y="25" width="250" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="16" font-weight="600">
-          <tspan x="300" y="58">Observation / Memory /</tspan>
-          <tspan x="300" dy="22">System Desc., etc.</tspan>
-        </text>
-
-        <!-- Box 2: LLM -->
-        <rect x="475" y="25" width="110" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="530" y="72" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">LLM</text>
-
-        <!-- Box 3: Plan -->
-        <rect x="635" y="25" width="110" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="690" y="72" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">Plan</text>
-
-        <!-- Box 4: Robot -->
-        <rect x="460" y="200" width="130" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="525" y="247" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">Robot</text>
-
-        <!-- Arrow: Input Task → Observation -->
-        <line x1="135" y1="65" x2="175" y2="65"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
-
-        <!-- Arrow 1: Observation → LLM -->
-        <line x1="425" y1="65" x2="475" y2="65"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
-
-        <!-- Arrow 2: LLM → Plan -->
-        <line x1="585" y1="65" x2="635" y2="65"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
-
-        <!-- Arrow 3: Plan → Robot (down then left) -->
-        <path d="M690,105 L690,240 L590,240" fill="none"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
-
-        <!-- Arrow 4: Robot → Observation (left then up) -->
-        <path d="M460,240 L300,240 L300,105" fill="none"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow)"/>
-      </svg>
+  <!-- Solution / Advantages Section -->
+  <section id="solution" class="solution-section">
+    <div class="solution-header">
+      <h2>Our Solution: <span>Asynchronous Multi-Agent Architecture</span></h2>
+      <p>Each agent runs at its own independent update frequency, directly addressing every limitation of the typical loop.</p>
     </div>
-    <p class="diagram-caption">Figure 1 — Typical LLM-based robot planning and control loop</p>
 
-    <h2 style="margin-top:48px;">Asynchronous Multi-Agent Architecture</h2>
-    <p>
-      Our solution is an asynchronous multi-agent architecture where each agent runs at its own
-      independent update frequency, directly addressing the limitations of the typical loop:
-    </p>
-    <ol>
-      <li><strong>Low-latency action execution:</strong> Reactive agents operate at high frequency without waiting for slow LLM inference, enabling immediate responses to environmental changes.</li>
-      <li><strong>Non-blocking pipeline:</strong> Agents run concurrently — observation, planning, and execution proceed in parallel rather than sequentially, keeping the robot continuously active.</li>
-      <li><strong>Speculative action pipelining:</strong> The planner can speculatively issue upcoming actions ahead of time, so the robot executes them as soon as the current action completes with minimal idle time.</li>
-      <li><strong>Concurrent multi-task handling:</strong> Independent agents can manage multiple goals simultaneously, with a priority-based scheduler arbitrating between them in real time.</li>
-      <li><strong>Distributed context management:</strong> Each agent maintains its own focused context, avoiding the single-prompt bottleneck and allowing richer, more specialized representations of state.</li>
-    </ol>
-    <div class="diagram-container">
-      <svg viewBox="0 0 850 530" xmlns="http://www.w3.org/2000/svg">
-        <defs>
-          <marker id="arrow2" viewBox="0 0 10 6" refX="10" refY="3"
-                  markerWidth="10" markerHeight="6" orient="auto">
-            <path d="M0,0 L10,3 L0,6 Z" fill="#58a6ff"/>
-          </marker>
-          <!-- Async circular-arrow icon (rotate-cw) -->
-          <symbol id="async" viewBox="0 0 24 24">
-            <polyline points="23,4 23,10 17,10" fill="none" stroke="#6e7681"
-                      stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M20.49,15 A9,9 0 1,1 18.37,5.64 L23,10" fill="none"
-                  stroke="#6e7681" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </symbol>
-        </defs>
+    <div class="advantage-grid">
+      <div class="advantage-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+        </div>
+        <h3>Low-Latency Action Execution</h3>
+        <p>Reactive agents operate at high frequency without waiting for slow LLM inference, enabling immediate responses to environmental changes.</p>
+      </div>
 
-        <!-- ── Input Task Block ── -->
-        <rect x="20" y="150" width="120" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="80" y="196" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="16" font-weight="600">Input Task</text>
+      <div class="advantage-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <h3>Non-Blocking Pipeline</h3>
+        <p>Agents run concurrently — observation, planning, and execution proceed in parallel rather than sequentially, keeping the robot continuously active.</p>
+      </div>
 
-        <!-- ── Observation Block ── -->
-        <rect x="185" y="150" width="240" height="80" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="16" font-weight="600">
-          <tspan x="305" y="183">Observation / Memory /</tspan>
-          <tspan x="305" dy="22">System Desc., etc.</tspan>
-        </text>
-        <use href="#async" x="403" y="208" width="20" height="20"/>
+      <div class="advantage-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+        </div>
+        <h3>Speculative Action Pipelining</h3>
+        <p>The planner speculatively issues upcoming actions ahead of time, so the robot executes them as soon as the current action completes with minimal idle time.</p>
+      </div>
 
-        <!-- ── S3 — Scheduler Block ── -->
-        <rect x="500" y="15" width="130" height="85" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="565" y="55" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">S3</text>
-        <text x="565" y="75" text-anchor="middle" fill="#8b949e"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="12">Scheduler</text>
-        <use href="#async" x="610" y="80" width="18" height="18"/>
+      <div class="advantage-card">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+        </div>
+        <h3>Concurrent Multi-Task Handling</h3>
+        <p>Independent agents manage multiple goals simultaneously, with a priority-based scheduler arbitrating between them in real time.</p>
+      </div>
 
-        <!-- ── Task-Specific Wrapper ── -->
-        <rect x="480" y="135" width="170" height="265" rx="10"
-              fill="none" stroke="#484f58" stroke-width="2" stroke-dasharray="8 4"/>
-        <text x="565" y="153" text-anchor="middle" fill="#6e7681"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="12" font-style="italic">Task-Specific</text>
-
-        <!-- ── S2 Block (inside wrapper) ── -->
-        <rect x="505" y="170" width="120" height="85" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="565" y="218" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">S2</text>
-        <use href="#async" x="605" y="233" width="18" height="18"/>
-
-        <!-- ── S1 Block (inside wrapper) ── -->
-        <rect x="505" y="305" width="120" height="85" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="565" y="353" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">S1</text>
-        <use href="#async" x="605" y="368" width="18" height="18"/>
-
-        <!-- ── Plan Block (right of S1) ── -->
-        <rect x="720" y="305" width="120" height="85" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="780" y="353" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">Plan</text>
-
-        <!-- ── Robot Block (below) ── -->
-        <rect x="500" y="460" width="130" height="70" rx="8"
-              fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
-        <text x="565" y="501" text-anchor="middle" fill="#e6edf3"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="18" font-weight="600">Robot</text>
-
-        <!-- ── Arrow: Input Task → Observation ── -->
-        <line x1="140" y1="190" x2="185" y2="190"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-
-        <!-- ── Arrows from Observation ── -->
-        <!-- Obs → S3 -->
-        <line x1="425" y1="170" x2="500" y2="57"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-        <!-- Obs → S2 -->
-        <line x1="425" y1="187" x2="505" y2="212"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-        <!-- Obs → S1 -->
-        <line x1="425" y1="210" x2="505" y2="347"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-
-        <!-- ── S3 → Wrapper (schedules) ── -->
-        <line x1="565" y1="100" x2="565" y2="135"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-        <text x="610" y="122" text-anchor="start" fill="#8b949e"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="11" font-style="italic">schedules</text>
-
-        <!-- ── S2 → S1 (High-Level Plan) ── -->
-        <line x1="565" y1="255" x2="565" y2="305"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-        <text x="610" y="285" text-anchor="start" fill="#c9d1d9"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="12">High-Level Plan</text>
-
-        <!-- ── S1 → Plan (Function Calls) ── -->
-        <line x1="625" y1="350" x2="720" y2="350"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-        <text x="672" y="338" text-anchor="middle" fill="#c9d1d9"
-              font-family="-apple-system, BlinkMacSystemFont, sans-serif"
-              font-size="12">Function Calls</text>
-
-        <!-- ── Plan → Robot (down then left) ── -->
-        <path d="M780,390 L780,495 L630,495" fill="none"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-
-        <!-- ── Robot → Observation (feedback loop) ── -->
-        <path d="M500,495 L300,495 L300,230" fill="none"
-              stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
-      </svg>
+      <div class="advantage-card highlight">
+        <div class="card-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m8.66-15l-5.2 3m-6.92 4l-5.2 3m14.14 0l-5.2-3m-6.92-4l-5.2-3"/></svg>
+        </div>
+        <h3>Distributed Context Management</h3>
+        <p>Each agent maintains its own focused context, avoiding the single-prompt bottleneck and allowing richer, more specialized representations of state.</p>
+      </div>
     </div>
-    <p class="diagram-caption">Figure 2 — TypeGo system, asynchronous multi-agent architecture with independent update frequencies.</p>
+
+    <div class="diagram-wrapper solution-diagram">
+      <div class="diagram-container">
+        <svg viewBox="0 0 850 530" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="arrow2" viewBox="0 0 10 6" refX="10" refY="3"
+                    markerWidth="10" markerHeight="6" orient="auto">
+              <path d="M0,0 L10,3 L0,6 Z" fill="#58a6ff"/>
+            </marker>
+            <!-- Async circular-arrow icon (rotate-cw) -->
+            <symbol id="async" viewBox="0 0 24 24">
+              <polyline points="23,4 23,10 17,10" fill="none" stroke="#6e7681"
+                        stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M20.49,15 A9,9 0 1,1 18.37,5.64 L23,10" fill="none"
+                    stroke="#6e7681" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </symbol>
+          </defs>
+
+          <!-- ── Input Task Block ── -->
+          <rect x="20" y="150" width="120" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="80" y="196" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="16" font-weight="600">Input Task</text>
+
+          <!-- ── Observation Block ── -->
+          <rect x="185" y="150" width="240" height="80" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="16" font-weight="600">
+            <tspan x="305" y="183">Observation / Memory /</tspan>
+            <tspan x="305" dy="22">System Desc., etc.</tspan>
+          </text>
+          <use href="#async" x="403" y="208" width="20" height="20"/>
+
+          <!-- ── S3 — Scheduler Block ── -->
+          <rect x="500" y="15" width="130" height="85" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="565" y="55" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">S3</text>
+          <text x="565" y="75" text-anchor="middle" fill="#8b949e"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="12">Scheduler</text>
+          <use href="#async" x="610" y="80" width="18" height="18"/>
+
+          <!-- ── Task-Specific Wrapper ── -->
+          <rect x="480" y="135" width="170" height="265" rx="10"
+                fill="none" stroke="#484f58" stroke-width="2" stroke-dasharray="8 4"/>
+          <text x="565" y="153" text-anchor="middle" fill="#6e7681"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="12" font-style="italic">Task-Specific</text>
+
+          <!-- ── S2 Block (inside wrapper) ── -->
+          <rect x="505" y="170" width="120" height="85" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="565" y="218" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">S2</text>
+          <use href="#async" x="605" y="233" width="18" height="18"/>
+
+          <!-- ── S1 Block (inside wrapper) ── -->
+          <rect x="505" y="305" width="120" height="85" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="565" y="353" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">S1</text>
+          <use href="#async" x="605" y="368" width="18" height="18"/>
+
+          <!-- ── Plan Block (right of S1) ── -->
+          <rect x="720" y="305" width="120" height="85" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="780" y="353" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">Plan</text>
+
+          <!-- ── Robot Block (below) ── -->
+          <rect x="500" y="460" width="130" height="70" rx="8"
+                fill="#1c2541" stroke="#58a6ff" stroke-width="2"/>
+          <text x="565" y="501" text-anchor="middle" fill="#e6edf3"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="18" font-weight="600">Robot</text>
+
+          <!-- ── Arrow: Input Task → Observation ── -->
+          <line x1="140" y1="190" x2="185" y2="190"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+
+          <!-- ── Arrows from Observation ── -->
+          <!-- Obs → S3 -->
+          <line x1="425" y1="170" x2="500" y2="57"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+          <!-- Obs → S2 -->
+          <line x1="425" y1="187" x2="505" y2="212"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+          <!-- Obs → S1 -->
+          <line x1="425" y1="210" x2="505" y2="347"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+
+          <!-- ── S3 → Wrapper (schedules) ── -->
+          <line x1="565" y1="100" x2="565" y2="135"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+          <text x="610" y="122" text-anchor="start" fill="#8b949e"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="11" font-style="italic">schedules</text>
+
+          <!-- ── S2 → S1 (High-Level Plan) ── -->
+          <line x1="565" y1="255" x2="565" y2="305"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+          <text x="610" y="285" text-anchor="start" fill="#c9d1d9"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="12">High-Level Plan</text>
+
+          <!-- ── S1 → Plan (Function Calls) ── -->
+          <line x1="625" y1="350" x2="720" y2="350"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+          <text x="672" y="338" text-anchor="middle" fill="#c9d1d9"
+                font-family="-apple-system, BlinkMacSystemFont, sans-serif"
+                font-size="12">Function Calls</text>
+
+          <!-- ── Plan → Robot (down then left) ── -->
+          <path d="M780,390 L780,495 L630,495" fill="none"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+
+          <!-- ── Robot → Observation (feedback loop) ── -->
+          <path d="M500,495 L300,495 L300,230" fill="none"
+                stroke="#58a6ff" stroke-width="2" marker-end="url(#arrow2)"/>
+        </svg>
+      </div>
+      <p class="diagram-caption">Figure 2 — TypeGo system, asynchronous multi-agent architecture with independent update frequencies.</p>
+    </div>
   </section>
 
   <!-- Demo Videos -->
@@ -521,18 +831,6 @@
           <p>Robot responds to a person and play with the sports ball.</p>
         </div>
       </div>
-
-      <!-- <div class="video-card">
-        <div class="video-thumb">
-          <div class="play-btn">
-            <svg viewBox="0 0 24 24"><polygon points="6,3 20,12 6,21"/></svg>
-          </div>
-        </div>
-        <div class="video-info">
-          <h3>Demo 3 — Robot Execution</h3>
-          <p>Placeholder for third demo video.</p>
-        </div>
-      </div> -->
 
     </div>
   </section>
