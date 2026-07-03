@@ -645,52 +645,169 @@
     }
     .diagram-caption b { color: var(--accent-hi); font-weight: 600; }
 
-    /* ═══════════════════════════════  DEMOS  ═══════════════════════════════ */
-    .video-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(290px, 1fr));
-      gap: 22px;
-      margin-top: clamp(30px, 4vw, 44px);
+    /* ═══════════════════════════════  PERSONAS  ═══════════════════════════════ */
+    .persona-section { background: linear-gradient(180deg, transparent, rgba(139,123,255,0.05) 45%, transparent); }
+    .capa-section    { background: linear-gradient(180deg, transparent, rgba(69,226,200,0.05) 45%, transparent); }
+    .persona-header, .capa-header { text-align: center; margin-bottom: clamp(30px, 4vw, 44px); }
+    .persona-header .eyebrow, .capa-header .eyebrow { justify-content: center; }
+    .persona-header h2, .capa-header h2 { font-size: clamp(2rem, 4.6vw, 3.1rem); }
+    .persona-header p, .capa-header p {
+      font-size: var(--fs-lead);
+      color: var(--text-muted);
+      margin: var(--sp-4) auto 0;
+      max-width: 64ch;
     }
-    .video-card {
+
+    /* shared-task banner */
+    .task-banner {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 8px 16px;
+      width: fit-content;
+      max-width: 100%;
+      margin: 0 auto clamp(34px, 5vw, 52px);
+      padding: 13px 24px;
+      border-radius: var(--r-pill);
+      background:
+        linear-gradient(rgba(18,18,27,0.72), rgba(18,18,27,0.72)) padding-box,
+        var(--grad) border-box;
+      border: 1px solid transparent;
+      backdrop-filter: blur(6px);
+      text-align: center;
+    }
+    .task-label {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: var(--fs-xs);
+      font-weight: 500;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+    .task-cmd {
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      font-family: "Space Grotesk", sans-serif;
+      font-weight: 600;
+      font-size: 1.06rem;
+      letter-spacing: -0.01em;
+      color: var(--text);
+    }
+    .task-cmd svg { width: 17px; height: 17px; color: var(--accent-cyan); }
+
+    /* comparison grid + split cards — shared by Personas (§03) and Exception Handling (§04) */
+    .persona-grid, .capa-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 22px;
+    }
+    .persona-card, .capa-card {
+      --p-accent:    var(--accent-hi);
+      --p-line:      var(--accent-line);
+      --p-glow:      0 0 44px rgba(139,123,255,0.22);
+      position: relative;
+      display: flex;
+      flex-direction: column;
       background: linear-gradient(180deg, var(--surface-2), var(--surface));
       border: 1px solid var(--line);
-      border-radius: var(--r-lg);
+      border-radius: var(--r-xl);
+      padding: 26px;
       overflow: hidden;
       transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
     }
-    .video-card:hover {
+    .persona-card::before, .capa-card::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, var(--p-accent), transparent);
+    }
+    .persona-card:hover, .capa-card:hover {
       transform: translateY(-5px);
-      border-color: var(--accent-line);
-      box-shadow: var(--shadow-lg), var(--glow-blue);
+      border-color: var(--p-line);
+      box-shadow: var(--shadow-lg), var(--p-glow);
     }
-    .video-frame {
-      position: relative;
-      aspect-ratio: 16 / 9;
-      background: #04050a;
-      border-bottom: 1px solid var(--line);
+    /* per-card accent themes */
+    .persona-toto    { --p-accent: var(--accent-cyan); --p-line: rgba(69,226,200,0.34);  --p-glow: 0 0 44px rgba(69,226,200,0.20); }
+    .persona-nana    { --p-accent: var(--accent-hi);  --p-line: rgba(139,123,255,0.34); --p-glow: 0 0 44px rgba(139,123,255,0.22); }
+    .mode-deliberate { --p-accent: var(--accent-hi);  --p-line: rgba(139,123,255,0.34); --p-glow: 0 0 44px rgba(139,123,255,0.22); }
+    .mode-reactive   { --p-accent: var(--accent-cyan); --p-line: rgba(69,226,200,0.34);  --p-glow: 0 0 44px rgba(69,226,200,0.20); }
+
+    .persona-head, .capa-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+    .persona-avatar, .capa-avatar {
+      width: 46px; height: 46px;
+      flex-shrink: 0;
+      border-radius: 13px;
+      display: flex; align-items: center; justify-content: center;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid var(--p-line);
     }
-    .video-frame video { width: 100%; height: 100%; object-fit: cover; }
-    .video-info { padding: 18px 20px 22px; }
-    .video-tag {
-      display: inline-block;
+    .persona-avatar svg, .capa-avatar svg { width: 24px; height: 24px; color: var(--p-accent); }
+    .persona-id, .capa-id { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+    .persona-badge, .capa-badge {
+      align-self: flex-start;
       font-family: "IBM Plex Mono", ui-monospace, monospace;
       font-size: var(--fs-xs);
       font-weight: 500;
       letter-spacing: 0.2em;
       text-transform: uppercase;
-      color: var(--accent-hi);
-      margin-bottom: var(--sp-2);
+      color: var(--p-accent);
     }
-    .video-info h3 {
+    .persona-name, .capa-name {
       font-family: "Space Grotesk", sans-serif;
+      font-size: 1.65rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1;
       color: var(--text);
-      font-size: var(--fs-h3);
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      margin-bottom: 5px;
     }
-    .video-info p { color: var(--text-muted); font-size: var(--fs-sm); }
+
+    /* the embedded natural-language story (Personas) */
+    .persona-story {
+      position: relative;
+      font-size: 1.02rem;
+      line-height: 1.62;
+      color: var(--text-muted);
+      font-style: italic;
+      padding-left: 18px;
+      border-left: 2px solid var(--p-line);
+      margin-bottom: 18px;
+    }
+
+    .persona-traits { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+    .trait {
+      font-family: "IBM Plex Mono", ui-monospace, monospace;
+      font-size: var(--fs-xs);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      color: var(--text);
+      padding: 5px 12px;
+      border-radius: var(--r-pill);
+      border: 1px solid var(--line-2);
+      background: rgba(255,255,255,0.02);
+    }
+
+    /* the capability description (Exception Handling) */
+    .capa-desc {
+      font-size: 1.0rem;
+      line-height: 1.62;
+      color: var(--text-muted);
+      margin-bottom: 22px;
+    }
+    .capa-desc b { color: var(--p-accent); font-weight: 600; }
+
+    .persona-video, .capa-video {
+      position: relative;
+      aspect-ratio: 16 / 9;
+      margin-top: auto;
+      border-radius: var(--r-md);
+      overflow: hidden;
+      background: #04050a;
+      border: 1px solid var(--line-2);
+    }
+    .persona-video video, .capa-video video { width: 100%; height: 100%; object-fit: cover; }
 
     /* ═══════════════════════════════  FOOTER  ═══════════════════════════════ */
     footer {
@@ -773,6 +890,9 @@
     }
 
     /* ═══════════════════════════════  RESPONSIVE  ═══════════════════════════════ */
+    @media (max-width: 760px) {
+      .persona-grid, .capa-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 640px) {
       .nav-cta span { display: none; }
       .nav-cta { padding: 8px; }
@@ -813,6 +933,7 @@
       <ul class="nav-links">
         <li><a href="#problem">Problem</a></li>
         <li><a href="#solution">Our Solution</a></li>
+        <li><a href="#personas">Personas</a></li>
         <li><a href="#demos">Demos</a></li>
       </ul>
       <a class="nav-cta" href="https://github.com/typefly/TypeFly" target="_blank" rel="noopener" aria-label="GitHub repository">
@@ -837,7 +958,7 @@
       <p class="tagline" data-reveal style="--i:3">Translate natural-language stories into robot personalities and behaviors — powered by asynchronous LLM agents that convert narratives into internal configurations to control how your robot acts.</p>
 
       <div class="cta-row" data-reveal style="--i:4">
-        <a class="btn primary" href="#demos">
+        <a class="btn primary" href="#personas">
           <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
           Watch Demos
         </a>
@@ -1186,35 +1307,111 @@
     </div>
   </section>
 
-  <!-- Demo Videos -->
-  <section id="demos">
+  <!-- Personalized Control -->
+  <section id="personas" class="persona-section">
     <div class="wrap">
-      <div class="section-head" data-reveal>
-        <span class="eyebrow"><span class="idx">03</span> Demos</span>
-        <h2>Demo Videos</h2>
+      <div class="persona-header" data-reveal>
+        <span class="eyebrow"><span class="idx">03</span> Personalized Control</span>
+        <h2>Same Task, <span class="grad">Different Personalities</span></h2>
+        <p>TypeGo turns a short written story into a robot's personality. Give two personas the exact same command and each one carries it out in its own unmistakable style.</p>
       </div>
 
-      <div class="video-grid">
+      <div class="task-banner" data-reveal>
+        <span class="task-label">Shared Task</span>
+        <span class="task-cmd">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+          Find and follow the person
+        </span>
+      </div>
 
-        <article class="video-card" data-reveal style="--i:0">
-          <div class="video-frame">
-            <video src="assets/exception-see-person.mp4" controls muted playsinline></video>
+      <div class="persona-grid">
+
+        <article class="persona-card persona-toto" data-reveal style="--i:0">
+          <div class="persona-head">
+            <div class="persona-avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16.5" rx="4.3" ry="3.4"/><circle cx="6.4" cy="11" r="1.95"/><circle cx="10" cy="7.8" r="1.95"/><circle cx="14" cy="7.8" r="1.95"/><circle cx="17.6" cy="11" r="1.95"/></svg>
+            </div>
+            <div class="persona-id">
+              <span class="persona-badge">Persona A</span>
+              <h3 class="persona-name">Toto</h3>
+            </div>
           </div>
-          <div class="video-info">
-            <span class="video-tag">Demo 01</span>
-            <h3>Exception Handling: See Person</h3>
-            <p>Robot detects and responds to a person entering the scene.</p>
+          <blockquote class="persona-story">A small, quick scamp who darts and skitters everywhere in fast little bursts, investigating everything and never settling on one thing.</blockquote>
+          <div class="persona-traits">
+            <span class="trait">Fast</span>
+            <span class="trait">Curious</span>
+            <span class="trait">Restless</span>
+          </div>
+          <div class="persona-video">
+            <video src="assets/follow__toto.mp4" controls muted loop playsinline preload="metadata"></video>
           </div>
         </article>
 
-        <article class="video-card" data-reveal style="--i:1">
-          <div class="video-frame">
-            <video src="assets/play-with-ball.mp4" controls muted playsinline></video>
+        <article class="persona-card persona-nana" data-reveal style="--i:1">
+          <div class="persona-head">
+            <div class="persona-avatar">
+              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16.5" rx="4.3" ry="3.4"/><circle cx="6.4" cy="11" r="1.95"/><circle cx="10" cy="7.8" r="1.95"/><circle cx="14" cy="7.8" r="1.95"/><circle cx="17.6" cy="11" r="1.95"/></svg>
+            </div>
+            <div class="persona-id">
+              <span class="persona-badge">Persona B</span>
+              <h3 class="persona-name">Nana</h3>
+            </div>
           </div>
-          <div class="video-info">
-            <span class="video-tag">Demo 02</span>
-            <h3>Active response to external events</h3>
-            <p>Robot responds to a person and play with the sports ball.</p>
+          <blockquote class="persona-story">A gentle nursemaid dog who makes calm, dutiful rounds — moving smoothly to tidy, herd, and check on the people in her care.</blockquote>
+          <div class="persona-traits">
+            <span class="trait">Calm</span>
+            <span class="trait">Dutiful</span>
+            <span class="trait">Watchful</span>
+          </div>
+          <div class="persona-video">
+            <video src="assets/follow__nana.mp4" controls muted loop playsinline preload="metadata"></video>
+          </div>
+        </article>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- Exception Handling -->
+  <section id="demos" class="capa-section">
+    <div class="wrap">
+      <div class="capa-header" data-reveal>
+        <span class="eyebrow"><span class="idx">04</span> Exception Handling</span>
+        <h2>Handling the <span class="grad">Unexpected</span></h2>
+        <p>Because every agent runs asynchronously, the robot copes with interruptions two ways — deliberately switching between tasks, or reacting to a sudden event in an instant and then resuming.</p>
+      </div>
+
+      <div class="capa-grid">
+
+        <article class="capa-card mode-deliberate" data-reveal style="--i:0">
+          <div class="capa-head">
+            <div class="capa-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+            </div>
+            <div class="capa-id">
+              <span class="capa-badge">Deliberate</span>
+              <h3 class="capa-name">Switch Between Tasks</h3>
+            </div>
+          </div>
+          <p class="capa-desc">A person enters the scene, so the robot <b>deliberately</b> sets its current task aside, attends to the new priority, and switches context — a scheduled, arbitrated hand-off between goals.</p>
+          <div class="capa-video">
+            <video src="assets/exception-see-person.mp4" controls muted loop playsinline preload="metadata"></video>
+          </div>
+        </article>
+
+        <article class="capa-card mode-reactive" data-reveal style="--i:1">
+          <div class="capa-head">
+            <div class="capa-avatar">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
+            </div>
+            <div class="capa-id">
+              <span class="capa-badge">Reactive</span>
+              <h3 class="capa-name">React Fast &amp; Resume</h3>
+            </div>
+          </div>
+          <p class="capa-desc">A sudden external event triggers a <b>reflexive</b>, low-latency response — the robot reacts to the person and plays with the ball in real time, then resumes what it was doing without a full planning cycle.</p>
+          <div class="capa-video">
+            <video src="assets/play-with-ball.mp4" controls muted loop playsinline preload="metadata"></video>
           </div>
         </article>
 
