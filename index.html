@@ -3,1472 +3,700 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TypeGo — Multi-Agent LLM-Based Robot Planning System</title>
-  <meta name="description" content="TypeGo turns natural-language stories into robot personalities and behaviors through asynchronous, multi-agent LLM planning and control.">
+  <title>TypeGo — Give Your Robot a Personality</title>
+  <meta name="description" content="TypeGo is an asynchronous multi-agent LLM system that compiles natural-language stories into robot personalities and behaviors.">
 
-  <!-- Set JS flag synchronously to prevent flash-of-content on scroll-reveal -->
   <script>document.documentElement.classList.add('js');</script>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
   <style>
-    /* ═══════════════════════════════  DESIGN TOKENS  ═══════════════════════════════ */
+    /* ═══════════════════════════════  TOKENS — dark "console" world  ═══════════════════════════════ */
     :root {
-      /* surfaces */
-      --bg:            #07070d;
-      --bg-2:          #0a0a12;
-      --surface:       #0f0f19;
-      --surface-2:     #14141f;
-      --surface-3:     #191926;
+      color-scheme: dark;
 
-      /* hairlines */
-      --line:          rgba(255, 255, 255, 0.07);
-      --line-2:        rgba(255, 255, 255, 0.12);
-      --line-3:        rgba(255, 255, 255, 0.18);
+      --bg:        #0a0c12;
+      --bg-2:      #0b0d14;
+      --panel:     #14161e;
+      --panel-2:   #191c26;
+      --diagram:   #0b0d13;
 
-      /* text (tuned for AA contrast on near-black) */
-      --text:          #f3f4fb;
-      --text-muted:    #aeb0c8;
-      --text-dim:      #8c8ea8;     /* small captions/copy — ~6:1 on --bg */
+      --ink:       #eef1f7;
+      --text:      #b9becc;
+      --dim:       #888ea0;
+      --faint:     #5f6577;
 
-      /* accents */
-      --accent:        #8b7bff;
-      --accent-hi:     #a89bff;
-      --accent-blue:   #6ea8ff;
-      --accent-cyan:   #45e2c8;
-      --accent-soft:   rgba(139, 123, 255, 0.12);
-      --accent-line:   rgba(139, 123, 255, 0.30);
+      --line:      rgba(255,255,255,0.09);
+      --line-2:    rgba(255,255,255,0.14);
+      --line-3:    rgba(255,255,255,0.20);
 
-      --danger:        #ff8592;
-      --danger-hi:     #ffb0b8;
-      --danger-soft:   rgba(255, 133, 146, 0.07);
-      --danger-line:   rgba(255, 133, 146, 0.20);
+      --mag:       #ff2e7e;   /* input · story */
+      --tl:        #1fe0c0;   /* output · persona · primary accent */
+      --tl-2:      #55ecd3;
+      --tl-soft:   rgba(31,224,192,0.10);
+      --tl-line:   rgba(31,224,192,0.32);
+      --s3:        #ffb020;
+      --s2:        #38d0e6;
+      --s1:        #4ce894;
+      --s0:        #a98bff;
+      --play:      #ff5a6a;
 
-      --grad:          linear-gradient(115deg, var(--accent-hi) 0%, var(--accent-blue) 48%, var(--accent-cyan) 100%);
-      --grad-soft:     linear-gradient(120deg, rgba(168,155,255,.16), rgba(69,226,200,.16));
+      --sans:  "Archivo", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+      --mono:  "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
 
-      /* spacing scale */
-      --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
-      --sp-5: 24px;  --sp-6: 32px;  --sp-7: 48px;  --sp-8: 64px;
-      --sp-9: 96px;  --sp-10: 128px;
+      --fs-display: clamp(3.2rem, 8.5vw, 6rem);
+      --fs-h2:      clamp(1.85rem, 3.8vw, 2.7rem);
+      --fs-h3:      1.22rem;
+      --fs-lead:    clamp(1.08rem, 1.7vw, 1.28rem);
+      --fs-body:    1.05rem;
+      --fs-sm:      0.92rem;
+      --fs-mono:    0.75rem;
 
-      /* radii */
-      --r-sm: 8px;  --r-md: 12px;  --r-lg: 16px;  --r-xl: 22px;  --r-pill: 999px;
-
-      /* shadows / depth */
-      --shadow-sm:  0 1px 2px rgba(0,0,0,0.4);
-      --shadow-md:  0 8px 30px rgba(0,0,0,0.45);
-      --shadow-lg:  0 28px 70px rgba(2,3,10,0.6);
-      --glow-blue:  0 0 44px rgba(110,168,255,0.28);
-      --glow:       0 0 0 1px var(--accent-line), 0 16px 50px rgba(139,123,255,0.20);
-
-      /* type scale */
-      --fs-display: clamp(3.4rem, 12vw, 7rem);
-      --fs-h2:      clamp(2rem, 4.4vw, 2.95rem);
-      --fs-h3:      1.06rem;
-      --fs-lead:    clamp(1.05rem, 1.9vw, 1.25rem);
-      --fs-body:    1.0625rem;
-      --fs-sm:      0.9rem;
-      --fs-xs:      0.76rem;
-
-      --maxw: 1120px;
-      --nav-h: 68px;
-      --ease: cubic-bezier(0.22, 0.72, 0.24, 1);
+      --sp-4: 16px; --sp-5: 24px; --sp-6: 32px; --sp-7: 48px; --sp-8: 64px;
+      --wrap: 1160px; --measure: 720px; --nav-h: 60px;
+      --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
     }
 
     /* ═══════════════════════════════  RESET / BASE  ═══════════════════════════════ */
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    html {
-      background: var(--bg);
-      scroll-behavior: smooth;
-      scroll-padding-top: 88px;
-      -webkit-text-size-adjust: 100%;
-    }
-
+    html { background: var(--bg); scroll-behavior: smooth; scroll-padding-top: 80px; -webkit-text-size-adjust: 100%; }
     body {
-      font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      background: transparent;
-      color: var(--text-muted);
-      line-height: 1.65;
-      font-size: var(--fs-body);
-      overflow-x: hidden;
-      -webkit-font-smoothing: antialiased;
-      text-rendering: optimizeLegibility;
+      font-family: var(--sans); background: transparent; color: var(--text);
+      font-size: var(--fs-body); line-height: 1.7; overflow-x: hidden;
+      -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility;
     }
-
-    a { color: var(--accent-blue); text-decoration: none; }
-    ::selection { background: rgba(139, 123, 255, 0.30); color: #fff; }
-
-    :focus-visible {
-      outline: 2px solid var(--accent-hi);
-      outline-offset: 3px;
-      border-radius: 4px;
-    }
-
+    a { color: var(--tl); text-decoration: none; }
+    ::selection { background: rgba(31,224,192,0.24); color: #fff; }
+    :focus-visible { outline: 2px solid var(--tl); outline-offset: 3px; border-radius: 3px; }
     img, svg, video { display: block; max-width: 100%; }
+    b, strong { color: var(--ink); font-weight: 600; }
 
-    /* ═══════════════════════════════  BACKGROUND LAYERS  ═══════════════════════════════ */
-    .bg-glow, .bg-grid, .bg-grain {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      pointer-events: none;
-    }
-    .bg-glow {
+    /* ambient console glow (subtle, fixed) */
+    .amb { position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
-        radial-gradient(620px 460px at 18% -6%, rgba(139,123,255,0.22), transparent 62%),
-        radial-gradient(720px 520px at 88% -2%, rgba(69,226,200,0.10), transparent 58%),
-        radial-gradient(900px 720px at 50% 116%, rgba(110,168,255,0.08), transparent 60%);
-    }
-    .bg-grid {
-      background-image: radial-gradient(circle at 1px 1px, rgba(255,255,255,0.055) 1px, transparent 0);
-      background-size: 34px 34px;
-      opacity: 0.55;
-      -webkit-mask-image: radial-gradient(ellipse 95% 55% at 50% 0%, #000 15%, transparent 78%);
-              mask-image: radial-gradient(ellipse 95% 55% at 50% 0%, #000 15%, transparent 78%);
-    }
-    .bg-grain {
-      opacity: 0.04;
-      mix-blend-mode: overlay;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='140' height='140'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-    }
+        radial-gradient(680px 420px at 82% -6%, rgba(31,224,192,0.08), transparent 60%),
+        radial-gradient(620px 420px at 12% 2%, rgba(255,46,126,0.06), transparent 62%); }
 
-    /* ═══════════════════════════════  LAYOUT PRIMITIVES  ═══════════════════════════════ */
-    .nav-wrap, .hero, section, footer { position: relative; z-index: 1; }
+    .nav-wrap, main, footer { position: relative; z-index: 1; }
+    .wrap { width: 100%; max-width: var(--wrap); margin-inline: auto; padding-inline: clamp(20px, 5vw, 46px); }
+    section { padding-block: clamp(60px, 8.5vw, 104px); scroll-margin-top: 80px; }
+    section + section { border-top: 1px solid var(--line); }
 
-    section {
-      padding-block: clamp(76px, 10vw, 124px);
-      scroll-margin-top: 88px;
-    }
-    .wrap {
-      width: 100%;
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding-inline: clamp(20px, 5vw, 44px);
-    }
-
-    /* eyebrow / kicker — mono micro-typography */
     .eyebrow {
-      display: inline-flex;
-      align-items: center;
-      gap: 12px;
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: var(--fs-xs);
-      font-weight: 500;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: var(--sp-4);
+      font-family: var(--mono); font-size: var(--fs-mono); letter-spacing: 0.16em;
+      text-transform: uppercase; color: var(--tl); display: inline-flex; align-items: center; gap: 10px;
     }
-    .eyebrow::before {
-      content: "";
-      width: 28px;
-      height: 1px;
-      background: linear-gradient(90deg, var(--accent), transparent);
-    }
-    .eyebrow .idx { color: var(--accent-hi); }
-    .eyebrow.is-danger .idx { color: var(--danger-hi); }
-    .eyebrow.is-danger::before { background: linear-gradient(90deg, var(--danger), transparent); }
+    .lead { font-size: var(--fs-lead); color: var(--text); line-height: 1.6; max-width: 62ch; }
 
-    h2 {
-      font-family: "Space Grotesk", "Inter", sans-serif;
-      color: var(--text);
-      font-size: var(--fs-h2);
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      line-height: 1.08;
-      text-wrap: balance;
-    }
-    h2 .grad {
-      background: var(--grad);
-      background-size: 200% auto;
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      animation: shimmer 8s linear infinite;
-    }
-
-    .lead {
-      font-size: var(--fs-lead);
-      color: var(--text-muted);
-      max-width: 65ch;
-      margin-top: var(--sp-4);
-    }
-
-    /* ═══════════════════════════════  NAV  ═══════════════════════════════ */
+    /* ═══════════════════════════════  NAV (transport header)  ═══════════════════════════════ */
     .nav-wrap {
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      background: rgba(9, 9, 15, 0.55);
-      backdrop-filter: blur(16px) saturate(140%);
-      -webkit-backdrop-filter: blur(16px) saturate(140%);
-      border-bottom: 1px solid transparent;
-      transition: border-color 0.3s var(--ease), background 0.3s var(--ease);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(10,12,18,0.55); backdrop-filter: blur(14px) saturate(140%);
+      -webkit-backdrop-filter: blur(14px) saturate(140%);
+      border-bottom: 1px solid transparent; transition: border-color .3s var(--ease), background .3s var(--ease);
     }
-    .nav-wrap.scrolled {
-      background: rgba(9, 9, 15, 0.82);
-      border-bottom-color: var(--line);
-    }
-    nav {
-      max-width: var(--maxw);
-      margin: 0 auto;
-      height: var(--nav-h);
-      padding-inline: clamp(18px, 5vw, 44px);
-      display: flex;
-      align-items: center;
-      gap: var(--sp-5);
-    }
-    .brand {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      font-size: 1.22rem;
-      letter-spacing: -0.02em;
-      color: var(--text);
-      margin-right: auto;
-    }
-    .brand span {
-      background: var(--grad);
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-    }
-    .nav-links {
-      list-style: none;
-      display: flex;
-      gap: clamp(14px, 3vw, 32px);
-    }
-    .nav-links a {
-      position: relative;
-      color: var(--text-muted);
-      font-size: var(--fs-sm);
-      font-weight: 500;
-      padding: 4px 0;
-      white-space: nowrap;
-      transition: color 0.2s var(--ease);
-    }
-    .nav-links a::after {
-      content: "";
-      position: absolute;
-      left: 0; right: 0; bottom: -3px;
-      height: 1.5px;
-      border-radius: 2px;
-      background: var(--grad);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.28s var(--ease);
-    }
-    .nav-links a:hover, .nav-links a:focus-visible { color: var(--text); }
-    .nav-links a:hover::after, .nav-links a:focus-visible::after { transform: scaleX(1); }
-
-    .nav-cta {
-      display: inline-flex;
-      align-items: center;
-      gap: 7px;
-      padding: 8px 15px;
-      border-radius: var(--r-pill);
-      font-size: var(--fs-sm);
-      font-weight: 500;
-      color: var(--text);
-      border: 1px solid var(--line-2);
-      background: rgba(255,255,255,0.02);
-      transition: border-color 0.2s var(--ease), background 0.2s var(--ease), transform 0.2s var(--ease);
-    }
-    .nav-cta svg { width: 16px; height: 16px; fill: currentColor; }
-    .nav-cta:hover, .nav-cta:focus-visible {
-      border-color: var(--accent-line);
-      background: var(--accent-soft);
-      transform: translateY(-1px);
-      color: var(--text);
-    }
+    .nav-wrap.scrolled { background: rgba(10,12,18,0.86); border-bottom-color: var(--line); }
+    nav { max-width: var(--wrap); margin-inline: auto; height: var(--nav-h); padding-inline: clamp(18px,5vw,46px);
+      display: flex; align-items: center; gap: var(--sp-5); }
+    .brand { font-family: var(--sans); font-weight: 800; font-size: 1.34rem; letter-spacing: -0.03em; color: var(--ink); margin-right: auto; line-height: 1; }
+    .brand em { font-style: normal; color: var(--tl); }
+    .nav-toc { display: flex; gap: clamp(14px,2.4vw,26px); list-style: none; }
+    .nav-toc a { font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--dim); white-space: nowrap; padding: 4px 0; border-bottom: 1px solid transparent; transition: color .2s var(--ease), border-color .2s var(--ease); }
+    .nav-toc a .n { color: var(--tl); }
+    .nav-toc a:hover, .nav-toc a:focus-visible { color: var(--ink); border-bottom-color: var(--tl-line); }
+    .nav-src { display: inline-flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 0.72rem;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); border: 1px solid var(--line-2);
+      border-radius: 6px; padding: 7px 12px; transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .nav-src svg { width: 15px; height: 15px; fill: currentColor; }
+    .nav-src:hover, .nav-src:focus-visible { border-color: var(--tl-line); background: var(--tl-soft); }
 
     /* ═══════════════════════════════  HERO  ═══════════════════════════════ */
-    .hero {
-      overflow: hidden;
-      text-align: center;
-      padding: clamp(84px, 13vw, 160px) clamp(20px, 5vw, 44px) clamp(60px, 9vw, 104px);
-    }
-    .hero-orbs { position: absolute; inset: 0; z-index: 0; pointer-events: none; }
-    .orb {
-      position: absolute;
-      border-radius: 50%;
-      filter: blur(72px);
-      opacity: 0.5;
-      will-change: transform;
-    }
-    .orb.o1 { width: 460px; height: 460px; top: -150px; left: 50%; margin-left: -230px;
-      background: radial-gradient(circle, rgba(139,123,255,0.55), transparent 66%); animation: floatA 16s ease-in-out infinite; }
-    .orb.o2 { width: 360px; height: 360px; top: 30px; left: -110px;
-      background: radial-gradient(circle, rgba(69,226,200,0.34), transparent 66%); animation: floatB 19s ease-in-out infinite; }
-    .orb.o3 { width: 400px; height: 400px; top: -10px; right: -130px;
-      background: radial-gradient(circle, rgba(110,168,255,0.40), transparent 66%); animation: floatA 22s ease-in-out infinite reverse; }
-
-    .hero-inner { position: relative; z-index: 1; }
-
-    .hero-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 7px 15px 7px 12px;
-      border-radius: var(--r-pill);
-      border: 1px solid var(--line-2);
-      background: rgba(255,255,255,0.025);
-      backdrop-filter: blur(6px);
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: var(--fs-xs);
-      font-weight: 500;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: clamp(24px, 4vw, 40px);
-    }
-    .hero-badge .dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--accent-cyan);
-      box-shadow: 0 0 0 3px rgba(69,226,200,0.18);
-      animation: pulse 2.6s var(--ease) infinite;
-    }
-
-    .hero h1 {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: var(--fs-display);
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.045em;
-      line-height: 0.94;
-    }
-    .hero h1 span.go {
-      background: linear-gradient(100deg, var(--accent-hi), var(--accent-blue), var(--accent-cyan), var(--accent-hi));
-      background-size: 220% auto;
-      -webkit-background-clip: text; background-clip: text; color: transparent;
-      filter: drop-shadow(0 6px 30px rgba(139,123,255,0.42));
-      animation: shimmer 7s linear infinite;
-    }
-    .hero h1 .caret {
-      display: inline-block;
-      width: clamp(11px, 1.5vw, 22px);
-      height: 0.8em;
-      margin-left: clamp(6px, 1.2vw, 16px);
-      border-radius: 3px;
-      background: var(--grad);
-      vertical-align: -0.02em;
-      box-shadow: 0 0 26px rgba(139,123,255,0.5);
-      animation: blink 1.05s steps(1, end) infinite;
-    }
-
-    .hero .subtitle {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: clamp(1.2rem, 3vw, 1.9rem);
-      font-weight: 500;
-      color: var(--text);
-      margin-top: clamp(18px, 3vw, 28px);
-      letter-spacing: -0.01em;
-    }
-    .hero .tagline {
-      font-size: var(--fs-lead);
-      color: var(--text-muted);
-      max-width: 660px;
-      margin: var(--sp-5) auto 0;
-      line-height: 1.6;
-    }
-
-    /* CTA row */
-    .cta-row {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 14px;
-      margin-top: clamp(30px, 4vw, 44px);
-    }
-    .btn {
-      position: relative;
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      font-weight: 600;
-      font-size: 0.95rem;
-      padding: 13px 26px;
-      border-radius: var(--r-pill);
-      overflow: hidden;
-      cursor: pointer;
-      transition: transform 0.25s var(--ease), box-shadow 0.25s var(--ease), border-color 0.25s var(--ease);
-    }
-    .btn svg { width: 17px; height: 17px; }
-    .btn.primary {
-      color: #08040f;
-      background: var(--grad);
-      background-size: 180% auto;
-      box-shadow: var(--glow-blue);
-      animation: shimmer 7s linear infinite;
-    }
-    .btn.primary::after {
-      content: "";
-      position: absolute;
-      top: 0; left: -60%;
-      width: 45%; height: 100%;
-      background: linear-gradient(100deg, transparent, rgba(255,255,255,0.55), transparent);
-      transform: skewX(-18deg);
-      transition: left 0.6s var(--ease);
-    }
-    .btn.primary:hover { transform: translateY(-3px); box-shadow: 0 0 56px rgba(110,168,255,0.5); }
-    .btn.primary:hover::after { left: 130%; }
-    .btn.ghost {
-      color: var(--text);
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--line-2);
-    }
+    .hero { padding-top: clamp(48px, 7vw, 88px); padding-bottom: clamp(48px, 7vw, 88px); }
+    .hero-intro { max-width: 780px; }
+    .hero h1 { font-family: var(--sans); font-weight: 800; font-size: var(--fs-display); letter-spacing: -0.045em;
+      line-height: 0.92; color: var(--ink); margin-top: clamp(16px,2.4vw,24px); }
+    .hero h1 em { font-style: normal; color: var(--tl); }
+    .hero-sub { font-size: clamp(1.3rem, 3vw, 2rem); font-weight: 600; color: var(--ink); letter-spacing: -0.02em; margin-top: clamp(12px,1.8vw,18px); }
+    .hero-lede { font-size: var(--fs-lead); color: var(--text); max-width: 60ch; margin-top: var(--sp-4); line-height: 1.6; }
+    .cta-row { display: flex; flex-wrap: wrap; gap: 12px; margin-top: clamp(24px,3vw,32px); }
+    .btn { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 0.78rem;
+      letter-spacing: 0.08em; text-transform: uppercase; padding: 12px 22px; border-radius: 8px;
+      transition: transform .2s var(--ease), background .2s var(--ease), border-color .2s var(--ease), color .2s var(--ease); }
+    .btn svg { width: 15px; height: 15px; }
+    .btn.primary { background: var(--tl); color: #04201b; font-weight: 700; }
+    .btn.primary svg { fill: currentColor; }
+    .btn.primary:hover { transform: translateY(-2px); box-shadow: 0 12px 30px -12px rgba(31,224,192,0.6); }
+    .btn.ghost { color: var(--ink); border: 1px solid var(--line-2); }
     .btn.ghost svg { fill: currentColor; }
-    .btn.ghost:hover { transform: translateY(-3px); border-color: var(--accent-line); background: var(--accent-soft); color: var(--text); }
+    .btn.ghost:hover { border-color: var(--tl-line); background: var(--tl-soft); }
 
-    /* feature pills — gradient hairline */
-    .hero-highlights {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 12px;
-      margin-top: clamp(36px, 5vw, 54px);
-    }
-    .pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      padding: 10px 18px;
-      border-radius: var(--r-pill);
-      font-size: var(--fs-sm);
-      font-weight: 500;
-      color: var(--text);
-      background:
-        linear-gradient(rgba(18,18,27,0.6), rgba(18,18,27,0.6)) padding-box,
-        var(--grad) border-box;
-      border: 1px solid transparent;
-      backdrop-filter: blur(6px);
-      transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
-      animation: bob 6s ease-in-out infinite;
-    }
-    .pill:nth-child(2) { animation-delay: 0.8s; }
-    .pill:nth-child(3) { animation-delay: 1.6s; }
-    .pill:nth-child(4) { animation-delay: 2.4s; }
-    .pill:hover { transform: translateY(-4px); box-shadow: var(--glow-blue); }
-    .pill svg { width: 15px; height: 15px; flex-shrink: 0; color: var(--accent-cyan); }
+    /* ── the instrument (engine × score) ── */
+    .instrument { margin-top: clamp(34px, 5vw, 52px); background: linear-gradient(180deg, var(--panel), var(--bg-2));
+      border: 1px solid var(--line-2); border-radius: 16px; overflow: hidden; box-shadow: 0 40px 80px -50px #000; }
+    .inst-top { display: flex; align-items: center; gap: 14px; padding: 12px clamp(16px,3vw,26px);
+      border-bottom: 1px solid var(--line); font-family: var(--mono); font-size: 0.72rem; letter-spacing: 0.08em; color: var(--dim); }
+    .inst-top .play { color: var(--s1); }
+    .inst-top .inst-title { color: var(--text); }
+    .inst-top .live { margin-left: auto; display: inline-flex; align-items: center; gap: 8px; color: var(--play); }
+    .inst-top .live i { width: 8px; height: 8px; border-radius: 50%; background: var(--play); animation: blink 1.4s steps(1) infinite; }
+    .inst-select { display: flex; align-items: center; gap: 14px; padding: 16px clamp(16px,3vw,26px) 4px; }
+    .inst-select .sel-label { font-family: var(--mono); font-size: var(--fs-mono); letter-spacing: 0.14em; text-transform: uppercase; color: var(--faint); }
+    .toggle { display: inline-flex; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; font-family: var(--mono); font-size: 0.82rem; }
+    .toggle button { appearance: none; background: transparent; color: var(--dim); border: 0; padding: 9px 20px; cursor: pointer; letter-spacing: 0.03em; transition: color .2s var(--ease); }
+    .toggle button:hover { color: var(--ink); }
+    .toggle button.on { background: var(--tl); color: #04201b; font-weight: 700; }
 
-    /* scroll cue */
-    .scroll-cue {
-      display: inline-flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 8px;
-      margin-top: clamp(44px, 6vw, 70px);
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: 0.62rem;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    .scroll-cue .line {
-      width: 1px; height: 42px;
-      background: linear-gradient(var(--accent-cyan), transparent);
-      position: relative;
-      overflow: hidden;
-    }
-    .scroll-cue .line::after {
-      content: "";
-      position: absolute; top: -50%; left: 0;
-      width: 100%; height: 50%;
-      background: linear-gradient(#fff, transparent);
-      animation: drop 2.2s var(--ease) infinite;
-    }
+    .engine-grid { display: grid; grid-template-columns: 1fr auto 1fr; gap: clamp(14px,2.5vw,26px); align-items: stretch; padding: 16px clamp(16px,3vw,26px) 8px; }
+    .col { background: var(--panel-2); border: 1px solid var(--line); border-radius: 12px; padding: 16px; min-width: 0; }
+    .col-h { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.12em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 8px; padding-bottom: 12px; margin-bottom: 12px; border-bottom: 1px solid var(--line); }
+    .col.in .col-h { color: var(--mag); } .col.in .col-h::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--mag); }
+    .col.out .col-h { color: var(--tl); } .col.out .col-h::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: var(--tl); }
+    .story { font-family: var(--mono); font-size: 0.9rem; line-height: 1.7; color: var(--ink); min-height: 9em; }
+    .story .cur { color: var(--mag); animation: blink 1s steps(1) infinite; }
+    .pipe { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; }
+    .pipe .pipe-track { position: relative; width: 2px; flex: 1; min-height: 64px; background: var(--line); overflow: hidden; }
+    .pipe .pipe-track i { position: absolute; left: -2px; width: 6px; height: 6px; border-radius: 50%; background: var(--tl); box-shadow: 0 0 8px var(--tl); animation: flowV 1.4s linear infinite; }
+    .pipe .pipe-track i:nth-child(2){ animation-delay: .47s; } .pipe .pipe-track i:nth-child(3){ animation-delay: .94s; }
+    .pipe .pipe-l { font-family: var(--mono); font-size: 0.6rem; letter-spacing: 0.1em; text-transform: uppercase; writing-mode: vertical-rl; color: var(--dim); }
+    .trait { margin-bottom: 14px; }
+    .trait .trait-l { display: flex; justify-content: space-between; font-family: var(--mono); font-size: 0.74rem; margin-bottom: 6px; color: var(--ink); }
+    .trait .trait-l span { color: var(--tl); font-variant-numeric: tabular-nums; }
+    .meter { height: 7px; border-radius: 4px; background: rgba(255,255,255,0.07); overflow: hidden; }
+    .meter i { display: block; height: 100%; width: 0; border-radius: 4px; background: linear-gradient(90deg, var(--tl), var(--tl-2)); transition: width .8s var(--ease); }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 15px; }
+    .chips span { font-family: var(--mono); font-size: 0.66rem; color: var(--tl); border: 1px solid var(--tl-line); border-radius: 5px; padding: 3px 9px; }
 
-    /* ═══════════════════════════════  PROBLEM  ═══════════════════════════════ */
-    .problem-section { background: linear-gradient(180deg, transparent, rgba(255,133,146,0.035) 45%, transparent); }
-    .section-head { max-width: 780px; margin-bottom: clamp(34px, 5vw, 52px); }
+    .dispatch { display: flex; align-items: center; gap: 14px; padding: 10px clamp(16px,3vw,26px) 6px;
+      font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
+    .dispatch::before, .dispatch::after { content: ""; height: 1px; background: var(--line); flex: 1; }
+    .dispatch b { color: var(--tl); }
 
-    /* editorial numbered drawback list */
-    .drawback-list {
-      list-style: none;
-      counter-reset: dbk;
-      margin-bottom: clamp(44px, 6vw, 72px);
-      border-top: 1px solid var(--line);
-    }
-    .drawback-list li {
-      counter-increment: dbk;
-      position: relative;
-      display: grid;
-      grid-template-columns: auto 1fr;
-      gap: clamp(16px, 3vw, 34px);
-      align-items: start;
-      padding-block: clamp(20px, 3vw, 30px);
-      border-bottom: 1px solid var(--line);
-      font-size: var(--fs-sm);
-      color: var(--text-muted);
-      transition: transform 0.28s var(--ease), border-color 0.28s var(--ease), background 0.28s var(--ease);
-    }
-    .drawback-list li::before {
-      content: counter(dbk, decimal-leading-zero);
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: clamp(1.1rem, 2.2vw, 1.5rem);
-      font-weight: 500;
-      line-height: 1.05;
-      color: var(--danger);
-      opacity: 0.72;
-      transition: opacity 0.28s var(--ease);
-    }
-    .drawback-list li:hover {
-      transform: translateX(6px);
-      border-color: var(--danger-line);
-      background: linear-gradient(90deg, var(--danger-soft), transparent 70%);
-    }
-    .drawback-list li:hover::before { opacity: 1; }
-    .drawback-list li strong { color: var(--danger-hi); font-weight: 600; }
-    .dbk-body { max-width: 72ch; }
+    .score { padding: 8px clamp(16px,3vw,26px) clamp(18px,3vw,26px); }
+    .rails { position: relative; }
+    .lane { margin-bottom: 12px; }
+    .lane .lane-l { display: flex; justify-content: space-between; align-items: baseline; font-family: var(--mono); font-size: 0.72rem; margin-bottom: 6px; }
+    .lane .lane-l b { color: var(--ink); font-weight: 600; }
+    .lane .lane-l .hz { color: var(--c); }
+    .lane .rail { height: 28px; border-radius: 6px; background: var(--panel-2); border: 1px solid var(--line); overflow: hidden; position: relative; }
+    .lane .rail .notes { position: absolute; inset: 0; background-repeat: repeat-x; background-size: var(--gap) 100%;
+      background-image: linear-gradient(90deg, var(--c) 0 var(--w), transparent var(--w) 100%); opacity: 0.9; border-radius: 3px;
+      animation: scroll var(--spd) linear infinite; }
+    .lane.l3 { --c: var(--s3); --gap: 100px; --w: 44px; --spd: 5s; }
+    .lane.l2 { --c: var(--s2); --gap: 48px;  --w: 24px; --spd: 2.1s; }
+    .lane.l1 { --c: var(--s1); --gap: 20px;  --w: 10px; --spd: 0.85s; }
+    .lane.l0 { --c: var(--s0); --gap: 12px;  --w: 6px;  --spd: 0.5s; }
+    .playhead { position: absolute; top: -6px; bottom: -6px; width: 2px; background: var(--play); box-shadow: 0 0 12px var(--play); animation: play 6s linear infinite; }
 
-    /* ═══════════════════════════════  SOLUTION  ═══════════════════════════════ */
-    .solution-section { background: linear-gradient(180deg, transparent, rgba(110,168,255,0.045) 45%, transparent); }
-    .solution-header { text-align: center; margin-bottom: clamp(40px, 6vw, 60px); }
-    .solution-header .eyebrow { justify-content: center; }
-    .solution-header h2 { font-size: clamp(2rem, 4.6vw, 3.1rem); }
-    .solution-header p {
-      font-size: var(--fs-lead);
-      color: var(--text-muted);
-      margin: var(--sp-4) auto 0;
-      max-width: 62ch;
-    }
+    /* ═══════════════════════════════  SECTION HEADERS  ═══════════════════════════════ */
+    .sec-head { max-width: 840px; margin-bottom: clamp(30px,4.5vw,48px); }
+    .sec-head h2 { font-family: var(--sans); font-weight: 700; font-size: var(--fs-h2); letter-spacing: -0.03em;
+      line-height: 1.06; color: var(--ink); margin-top: 12px; text-wrap: balance; }
+    .sec-head h2 em { font-style: normal; color: var(--tl); }
+    .sec-head .lead { margin-top: var(--sp-4); }
 
-    .advantage-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
-      gap: 18px;
-      margin-bottom: clamp(46px, 6vw, 72px);
-    }
-    .advantage-card {
-      position: relative;
-      background: linear-gradient(180deg, rgba(20,20,31,0.72), rgba(15,15,25,0.72));
-      border: 1px solid var(--line);
-      border-radius: var(--r-lg);
-      padding: 26px;
-      overflow: hidden;
-      backdrop-filter: blur(4px);
-      transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
-    }
-    .advantage-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 2px;
-      background: var(--grad);
-      transform: scaleX(0);
-      transform-origin: left;
-      transition: transform 0.35s var(--ease);
-    }
-    .advantage-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      background: radial-gradient(420px 210px at 50% -25%, rgba(139,123,255,0.13), transparent 70%);
-      opacity: 0;
-      transition: opacity 0.35s var(--ease);
-      pointer-events: none;
-    }
-    .advantage-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--accent-line);
-      box-shadow: var(--shadow-lg), var(--glow-blue);
-    }
-    .advantage-card:hover::before { transform: scaleX(1); }
-    .advantage-card:hover::after { opacity: 1; }
+    /* ═══════════════════════════════  §1 — PROBLEM (enumerated)  ═══════════════════════════════ */
+    .enum { max-width: 840px; list-style: none; counter-reset: en; }
+    .enum li { counter-increment: en; display: grid; grid-template-columns: 3.2rem 1fr; gap: 0 clamp(14px,2vw,22px);
+      align-items: baseline; padding-block: clamp(16px,2.2vw,24px); border-top: 1px solid var(--line); }
+    .enum li:last-child { border-bottom: 1px solid var(--line); }
+    .enum li::before { content: counter(en, decimal-leading-zero); font-family: var(--mono); font-size: 0.85rem; color: var(--play); font-variant-numeric: tabular-nums; }
+    .enum .t { font-size: 1.04rem; line-height: 1.6; color: var(--text); max-width: 64ch; }
+    .enum .t b { color: var(--ink); }
 
-    .card-icon {
-      position: relative;
-      width: 44px; height: 44px;
-      border-radius: 12px;
-      display: flex; align-items: center; justify-content: center;
-      margin-bottom: 18px;
-      background: var(--accent-soft);
-      border: 1px solid var(--accent-line);
-    }
-    .card-icon svg { width: 21px; height: 21px; color: var(--accent-hi); }
-    .advantage-card h3 {
-      font-family: "Space Grotesk", sans-serif;
-      color: var(--text);
-      font-size: var(--fs-h3);
-      font-weight: 600;
-      letter-spacing: -0.01em;
-      margin-bottom: 8px;
-    }
-    .advantage-card p { color: var(--text-muted); font-size: var(--fs-sm); line-height: 1.6; }
+    /* ═══════════════════════════════  FIGURES  ═══════════════════════════════ */
+    figure { margin-top: clamp(36px,5vw,60px); }
+    .diagram { position: relative; background: var(--diagram); border: 1px solid var(--line-2); border-radius: 12px;
+      padding: clamp(22px,4vw,40px) clamp(16px,3vw,32px); display: flex; align-items: center; justify-content: center; }
+    .fig-svg { width: 100%; max-width: 720px; height: auto; }
+    .diagram.wide .fig-svg { max-width: 820px; }
+    :root { --fig-node: #171a24; --fig-stroke: rgba(255,255,255,0.24); --fig-ink: #eef1f7; --fig-annot: #8b90a2; --fig-arrow: #6f7688; --fig-dash: rgba(255,255,255,0.26); --fig-accent: #1fe0c0; }
+    .fig-svg .fnode  { fill: var(--fig-node); stroke: var(--fig-stroke); stroke-width: 1.5; }
+    .fig-svg .fdash  { fill: none; stroke: var(--fig-dash); stroke-width: 1.5; stroke-dasharray: 7 5; }
+    .fig-svg .flabel { fill: var(--fig-ink);   font-family: var(--sans); font-weight: 600; }
+    .fig-svg .fsub   { fill: var(--fig-annot); font-family: var(--mono); }
+    .fig-svg .fannot { fill: var(--fig-annot); font-family: var(--mono); }
+    .fig-svg .fannot.em { fill: var(--fig-ink); }
+    .fig-svg .farrow { stroke: var(--fig-arrow); stroke-width: 1.75; fill: none; }
+    .fig-svg .amark  { fill: var(--fig-arrow); }
+    .fig-svg .aicon  { stroke: var(--fig-accent); fill: none; }
+    .fig-svg .freflex { stroke: var(--s0); stroke-width: 1.9; fill: none; }
+    .fig-svg .amarkV  { fill: var(--s0); }
+    .fig-svg .fannot.reflex { fill: var(--s0); }
+    figcaption { margin-top: var(--sp-5); text-align: center; max-width: 62ch; margin-inline: auto;
+      font-family: var(--mono); font-size: 0.76rem; color: var(--dim); line-height: 1.6; letter-spacing: 0.01em; }
+    figcaption .fnum { color: var(--tl); }
 
-    /* full-width editorial highlight (5th) card */
-    .advantage-card.highlight {
-      grid-column: 1 / -1;
-      display: flex;
-      align-items: center;
-      gap: clamp(20px, 4vw, 34px);
-      background:
-        radial-gradient(600px 260px at 12% -30%, rgba(139,123,255,0.16), transparent 70%),
-        linear-gradient(120deg, rgba(69,226,200,0.06), rgba(139,123,255,0.09));
-      border-color: var(--accent-line);
-    }
-    .advantage-card.highlight::before { transform: scaleX(1); }
-    .advantage-card.highlight .card-icon { margin-bottom: 0; flex-shrink: 0; }
-    .advantage-card.highlight .card-icon svg { color: var(--accent-cyan); }
-    .advantage-card.highlight h3 { font-size: 1.2rem; }
+    /* ═══════════════════════════════  §2 — METHOD (properties)  ═══════════════════════════════ */
+    .props { max-width: 840px; display: grid; grid-template-columns: 1fr 1fr; gap: 0 clamp(28px,5vw,56px); }
+    .prop { display: grid; grid-template-columns: 2rem 1fr; gap: 0 14px; align-items: baseline; padding-block: clamp(16px,2.2vw,24px); border-top: 1px solid var(--line); }
+    .prop .rn { font-family: var(--mono); font-size: 0.8rem; color: var(--tl); }
+    .prop h3 { font-family: var(--sans); font-size: var(--fs-h3); font-weight: 700; letter-spacing: -0.01em; color: var(--ink); }
+    .prop p { margin-top: 7px; font-size: var(--fs-sm); line-height: 1.6; color: var(--dim); }
+    .remark { max-width: 840px; margin-top: clamp(20px,3vw,30px); display: grid; grid-template-columns: 2rem 1fr; gap: 0 14px;
+      background: var(--tl-soft); border: 1px solid var(--tl-line); border-radius: 12px; padding: clamp(18px,3vw,26px); }
+    .remark .rn { font-family: var(--mono); font-size: 0.8rem; color: var(--tl); }
+    .remark .tag { font-family: var(--mono); font-size: 0.64rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tl); display: block; margin-bottom: 5px; }
+    .remark h3 { font-family: var(--sans); font-size: var(--fs-h3); font-weight: 700; color: var(--ink); letter-spacing: -0.01em; }
+    .remark p { margin-top: 7px; font-size: var(--fs-sm); line-height: 1.6; color: var(--text); }
 
-    /* ═══════════════════════════════  DIAGRAMS  ═══════════════════════════════ */
-    .diagram-wrapper { margin-top: var(--sp-6); }
-    .diagram-container {
-      position: relative;
-      border-radius: var(--r-xl);
-      padding: clamp(24px, 5vw, 44px) clamp(16px, 4vw, 32px);
-      display: flex; align-items: center; justify-content: center;
-      background:
-        radial-gradient(700px 340px at 50% -10%, rgba(139,123,255,0.08), transparent 70%),
-        linear-gradient(180deg, var(--surface-2), var(--surface));
-      border: 1px solid var(--line-2);
-      box-shadow: var(--shadow-md), inset 0 1px 0 rgba(255,255,255,0.03);
-      overflow: hidden;
-    }
-    .diagram-container::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 10%; right: 10%;
-      height: 1px;
-      background: linear-gradient(90deg, transparent, var(--accent-line), transparent);
-    }
-    .diagram-container svg { width: 100%; max-width: 720px; height: auto; }
-    .solution-diagram .diagram-container svg { max-width: 820px; }
+    /* ═══════════════════════════════  §3 / §4 — PANELS  ═══════════════════════════════ */
+    .task-note { max-width: 840px; margin: 0 0 clamp(28px,4vw,40px); }
+    .task-note .inner { display: inline-flex; align-items: center; flex-wrap: wrap; gap: 8px 14px; padding: 11px 20px;
+      border: 1px solid var(--line-2); border-radius: 8px; background: var(--panel); }
+    .task-note .lbl { font-family: var(--mono); font-size: var(--fs-mono); letter-spacing: 0.16em; text-transform: uppercase; color: var(--dim); }
+    .task-note .cmd { font-family: var(--mono); font-size: 0.95rem; color: var(--tl); }
 
-    .diagram-caption {
-      text-align: center;
-      margin-top: var(--sp-4);
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: var(--fs-xs);
-      letter-spacing: 0.04em;
-      color: var(--text-dim);
-    }
-    .diagram-caption b { color: var(--accent-hi); font-weight: 600; }
-
-    /* ═══════════════════════════════  PERSONAS  ═══════════════════════════════ */
-    .persona-section { background: linear-gradient(180deg, transparent, rgba(139,123,255,0.05) 45%, transparent); }
-    .capa-section    { background: linear-gradient(180deg, transparent, rgba(69,226,200,0.05) 45%, transparent); }
-    .persona-header, .capa-header { text-align: center; margin-bottom: clamp(30px, 4vw, 44px); }
-    .persona-header .eyebrow, .capa-header .eyebrow { justify-content: center; }
-    .persona-header h2, .capa-header h2 { font-size: clamp(2rem, 4.6vw, 3.1rem); }
-    .persona-header p, .capa-header p {
-      font-size: var(--fs-lead);
-      color: var(--text-muted);
-      margin: var(--sp-4) auto 0;
-      max-width: 64ch;
-    }
-
-    /* shared-task banner */
-    .task-banner {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-wrap: wrap;
-      gap: 8px 16px;
-      width: fit-content;
-      max-width: 100%;
-      margin: 0 auto clamp(34px, 5vw, 52px);
-      padding: 13px 24px;
-      border-radius: var(--r-pill);
-      background:
-        linear-gradient(rgba(18,18,27,0.72), rgba(18,18,27,0.72)) padding-box,
-        var(--grad) border-box;
-      border: 1px solid transparent;
-      backdrop-filter: blur(6px);
-      text-align: center;
-    }
-    .task-label {
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: var(--fs-xs);
-      font-weight: 500;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
-      color: var(--text-dim);
-    }
-    .task-cmd {
-      display: inline-flex;
-      align-items: center;
-      gap: 9px;
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 600;
-      font-size: 1.06rem;
-      letter-spacing: -0.01em;
-      color: var(--text);
-    }
-    .task-cmd svg { width: 17px; height: 17px; color: var(--accent-cyan); }
-
-    /* comparison grid + split cards — shared by Personas (§03) and Exception Handling (§04) */
-    .persona-grid, .capa-grid {
-      display: grid;
-      grid-template-columns: repeat(2, 1fr);
-      gap: 22px;
-    }
-    .persona-card, .capa-card {
-      --p-accent:    var(--accent-hi);
-      --p-line:      var(--accent-line);
-      --p-glow:      0 0 44px rgba(139,123,255,0.22);
-      position: relative;
-      display: flex;
-      flex-direction: column;
-      background: linear-gradient(180deg, var(--surface-2), var(--surface));
-      border: 1px solid var(--line);
-      border-radius: var(--r-xl);
-      padding: 26px;
-      overflow: hidden;
-      transition: transform 0.3s var(--ease), border-color 0.3s var(--ease), box-shadow 0.3s var(--ease);
-    }
-    .persona-card::before, .capa-card::before {
-      content: "";
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      background: linear-gradient(90deg, var(--p-accent), transparent);
-    }
-    .persona-card:hover, .capa-card:hover {
-      transform: translateY(-5px);
-      border-color: var(--p-line);
-      box-shadow: var(--shadow-lg), var(--p-glow);
-    }
-    /* per-card accent themes */
-    .persona-toto    { --p-accent: var(--accent-cyan); --p-line: rgba(69,226,200,0.34);  --p-glow: 0 0 44px rgba(69,226,200,0.20); }
-    .persona-nana    { --p-accent: var(--accent-hi);  --p-line: rgba(139,123,255,0.34); --p-glow: 0 0 44px rgba(139,123,255,0.22); }
-    .mode-deliberate { --p-accent: var(--accent-hi);  --p-line: rgba(139,123,255,0.34); --p-glow: 0 0 44px rgba(139,123,255,0.22); }
-    .mode-reactive   { --p-accent: var(--accent-cyan); --p-line: rgba(69,226,200,0.34);  --p-glow: 0 0 44px rgba(69,226,200,0.20); }
-
-    .persona-head, .capa-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
-    .persona-avatar, .capa-avatar {
-      width: 46px; height: 46px;
-      flex-shrink: 0;
-      border-radius: 13px;
-      display: flex; align-items: center; justify-content: center;
-      background: rgba(255,255,255,0.03);
-      border: 1px solid var(--p-line);
-    }
-    .persona-avatar svg, .capa-avatar svg { width: 24px; height: 24px; color: var(--p-accent); }
-    .persona-id, .capa-id { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
-    .persona-badge, .capa-badge {
-      align-self: flex-start;
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: var(--fs-xs);
-      font-weight: 500;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--p-accent);
-    }
-    .persona-name, .capa-name {
-      font-family: "Space Grotesk", sans-serif;
-      font-size: 1.65rem;
-      font-weight: 700;
-      letter-spacing: -0.02em;
-      line-height: 1;
-      color: var(--text);
-    }
-
-    /* the embedded natural-language story (Personas) */
-    .persona-story {
-      position: relative;
-      font-size: 1.02rem;
-      line-height: 1.62;
-      color: var(--text-muted);
-      font-style: italic;
-      padding-left: 18px;
-      border-left: 2px solid var(--p-line);
-      margin-bottom: 18px;
-    }
-
-    .persona-traits { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
-    .trait {
-      font-family: "IBM Plex Mono", ui-monospace, monospace;
-      font-size: var(--fs-xs);
-      font-weight: 500;
-      letter-spacing: 0.06em;
-      color: var(--text);
-      padding: 5px 12px;
-      border-radius: var(--r-pill);
-      border: 1px solid var(--line-2);
-      background: rgba(255,255,255,0.02);
-    }
-
-    /* the capability description (Exception Handling) */
-    .capa-desc {
-      font-size: 1.0rem;
-      line-height: 1.62;
-      color: var(--text-muted);
-      margin-bottom: 22px;
-    }
-    .capa-desc b { color: var(--p-accent); font-weight: 600; }
-
-    .persona-video, .capa-video {
-      position: relative;
-      aspect-ratio: 16 / 9;
-      margin-top: auto;
-      border-radius: var(--r-md);
-      overflow: hidden;
-      background: #04050a;
-      border: 1px solid var(--line-2);
-    }
-    .persona-video video, .capa-video video { width: 100%; height: 100%; object-fit: cover; }
+    .panels { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(20px,3vw,28px); }
+    .panel { display: flex; flex-direction: column; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 22px; transition: border-color .3s var(--ease), transform .3s var(--ease); }
+    .panel:hover { border-color: var(--tl-line); transform: translateY(-3px); }
+    .panel .p-badge { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--tl); }
+    .panel .p-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin: 6px 0 0; }
+    .panel .p-name { font-family: var(--sans); font-size: clamp(1.6rem,3vw,2rem); font-weight: 800; letter-spacing: -0.03em; line-height: 1; color: var(--ink); }
+    .panel .p-role { font-family: var(--mono); font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--dim); }
+    .panel blockquote { font-family: var(--mono); font-size: 0.9rem; line-height: 1.6; color: var(--text); padding-left: 14px; border-left: 2px solid var(--tl-line); margin: 14px 0 0; }
+    .panel .p-desc { font-size: var(--fs-sm); line-height: 1.6; color: var(--text); margin-top: 4px; }
+    .panel .p-desc b { color: var(--ink); }
+    .panel .traits { display: flex; flex-wrap: wrap; gap: 7px; margin-top: 16px; }
+    .panel .traits span { font-family: var(--mono); font-size: 0.66rem; letter-spacing: 0.04em; color: var(--dim); border: 1px solid var(--line-2); border-radius: 5px; padding: 4px 10px; }
+    .panel .p-video { margin-top: auto; padding-top: 20px; }
+    .panel .p-video .frame { aspect-ratio: 16/9; border: 1px solid var(--line-2); border-radius: 8px; overflow: hidden; background: #04060a; }
+    .panel .p-video video { width: 100%; height: 100%; object-fit: cover; }
 
     /* ═══════════════════════════════  FOOTER  ═══════════════════════════════ */
-    footer {
-      border-top: 1px solid var(--line);
-      background: linear-gradient(180deg, transparent, rgba(10,10,18,0.6));
-    }
-    .footer-inner {
-      max-width: var(--maxw);
-      margin: 0 auto;
-      padding: clamp(42px, 6vw, 66px) clamp(20px, 5vw, 44px);
-      text-align: center;
-    }
-    .footer-brand {
-      font-family: "Space Grotesk", sans-serif;
-      font-weight: 700;
-      font-size: 1.5rem;
-      letter-spacing: -0.02em;
-      color: var(--text);
-    }
-    .footer-brand span { background: var(--grad); -webkit-background-clip: text; background-clip: text; color: transparent; }
-    .footer-tag { color: var(--text-dim); font-size: var(--fs-sm); margin-top: 6px; }
-    .footer-links { margin-top: var(--sp-5); }
-    .footer-links a {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      color: var(--text-muted);
-      font-size: var(--fs-sm);
-      font-weight: 500;
-      padding: 9px 17px;
-      border-radius: var(--r-pill);
-      border: 1px solid var(--line-2);
-      transition: color 0.2s var(--ease), border-color 0.2s var(--ease), background 0.2s var(--ease);
-    }
-    .footer-links a svg { width: 16px; height: 16px; fill: currentColor; }
-    .footer-links a:hover {
-      color: var(--text);
-      border-color: var(--accent-line);
-      background: var(--accent-soft);
-    }
-    .footer-copy {
-      margin-top: var(--sp-5);
-      color: var(--text-dim);
-      font-size: var(--fs-xs);
-      letter-spacing: 0.02em;
-    }
+    footer { border-top: 1px solid var(--line); background: linear-gradient(180deg, transparent, rgba(255,255,255,0.015)); }
+    .colophon { max-width: var(--wrap); margin-inline: auto; padding: clamp(42px,6vw,68px) clamp(20px,5vw,46px); text-align: center; }
+    .colophon .mark { font-family: var(--sans); font-weight: 800; font-size: 1.7rem; letter-spacing: -0.03em; color: var(--ink); }
+    .colophon .mark em { font-style: normal; color: var(--tl); }
+    .colophon .tag { color: var(--dim); margin-top: 4px; }
+    .colophon .src { margin-top: var(--sp-5); }
+    .colophon .src a { display: inline-flex; align-items: center; gap: 9px; font-family: var(--mono); font-size: 0.74rem;
+      letter-spacing: 0.06em; text-transform: uppercase; color: var(--ink); border: 1px solid var(--line-2); border-radius: 8px; padding: 10px 18px;
+      transition: border-color .2s var(--ease), background .2s var(--ease); }
+    .colophon .src a svg { width: 16px; height: 16px; fill: currentColor; }
+    .colophon .src a:hover { border-color: var(--tl-line); background: var(--tl-soft); }
+    .colophon .set { margin-top: var(--sp-6); padding-top: var(--sp-5); border-top: 1px solid var(--line);
+      font-family: var(--mono); font-size: var(--fs-mono); letter-spacing: 0.03em; color: var(--faint); line-height: 1.9; }
+    .colophon .set .dot { margin-inline: 8px; }
 
-    /* ═══════════════════════════════  SCROLL REVEAL (JS-gated)  ═══════════════════════════════ */
-    .js [data-reveal] {
-      opacity: 0;
-      transform: translateY(26px);
-      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
-      transition-delay: calc(var(--i, 0) * 70ms);
-      will-change: opacity, transform;
-    }
+    /* ═══════════════════════════════  SCROLL REVEAL  ═══════════════════════════════ */
+    .js [data-reveal] { opacity: 0; transform: translateY(18px); transition: opacity .7s var(--ease), transform .7s var(--ease);
+      transition-delay: calc(var(--i,0) * 60ms); will-change: opacity, transform; }
     .js [data-reveal].is-visible { opacity: 1; transform: none; }
 
     /* ═══════════════════════════════  KEYFRAMES  ═══════════════════════════════ */
-    @keyframes shimmer { to { background-position: 220% center; } }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; box-shadow: 0 0 0 3px rgba(69,226,200,0.18); }
-      50%      { opacity: 0.7; box-shadow: 0 0 0 5px rgba(69,226,200,0.05); }
-    }
-    @keyframes blink { 0%, 50% { opacity: 1; } 50.01%, 100% { opacity: 0; } }
-    @keyframes bob {
-      0%, 100% { transform: translateY(0); }
-      50%      { transform: translateY(-5px); }
-    }
-    @keyframes floatA {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50%      { transform: translate(24px, 32px) scale(1.08); }
-    }
-    @keyframes floatB {
-      0%, 100% { transform: translate(0, 0) scale(1); }
-      50%      { transform: translate(-28px, 22px) scale(1.1); }
-    }
-    @keyframes drop {
-      0%   { top: -50%; }
-      100% { top: 120%; }
-    }
+    @keyframes blink { 0%,60% { opacity: 1; } 60.01%,100% { opacity: 0.2; } }
+    @keyframes scroll { to { background-position-x: calc(var(--gap) * -1); } }
+    @keyframes play { 0% { left: 1%; } 100% { left: 99%; } }
+    @keyframes flowV { 0% { top: -8px; } 100% { top: 100%; } }
+    @keyframes flowH { 0% { left: -8px; } 100% { left: 100%; } }
 
     /* ═══════════════════════════════  RESPONSIVE  ═══════════════════════════════ */
+    @media (max-width: 820px) { .props { grid-template-columns: 1fr; } }
     @media (max-width: 760px) {
-      .persona-grid, .capa-grid { grid-template-columns: 1fr; }
+      .panels { grid-template-columns: 1fr; }
+      .engine-grid { grid-template-columns: 1fr; }
+      .pipe { flex-direction: row; padding: 4px 0; }
+      .pipe .pipe-track { width: 100%; height: 2px; min-height: 0; flex: 1; }
+      .pipe .pipe-track i { top: -2px; left: -8px; animation-name: flowH; }
+      .pipe .pipe-l { writing-mode: horizontal-tb; }
     }
-    @media (max-width: 640px) {
-      .nav-cta span { display: none; }
-      .nav-cta { padding: 8px; }
-      .advantage-grid { grid-template-columns: 1fr; }
-      .advantage-card.highlight { flex-direction: column; align-items: flex-start; gap: var(--sp-4); }
-      .cta-row .btn { flex: 1 1 auto; justify-content: center; }
-    }
-    @media (max-width: 400px) {
-      .nav-links { gap: 12px; }
-      .nav-links a { font-size: 0.82rem; }
-      .brand { font-size: 1.08rem; }
-      .hero-badge { letter-spacing: 0.1em; }
-    }
+    @media (max-width: 640px) { .nav-toc { display: none; } }
+    @media (max-width: 460px) { .enum li { grid-template-columns: 1fr; gap: 4px; } }
 
-    /* ═══════════════════════════════  REDUCED MOTION  ═══════════════════════════════ */
     @media (prefers-reduced-motion: reduce) {
       html { scroll-behavior: auto; }
-      *, *::before, *::after {
-        animation-duration: 0.001ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.001ms !important;
-      }
+      *, *::before, *::after { animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
       .js [data-reveal] { opacity: 1 !important; transform: none !important; }
-      .orb { display: none; }
+      .inst-top .live i, .story .cur, .pipe .pipe-track i, .lane .rail .notes, .playhead { animation: none !important; }
     }
   </style>
 </head>
 <body id="top">
 
-  <div class="bg-glow" aria-hidden="true"></div>
-  <div class="bg-grid" aria-hidden="true"></div>
-  <div class="bg-grain" aria-hidden="true"></div>
+  <div class="amb" aria-hidden="true"></div>
 
-  <!-- Navigation -->
+  <!-- Nav -->
   <header class="nav-wrap">
     <nav>
-      <a class="brand" href="#top" aria-label="TypeGo home">Type<span>Go</span></a>
-      <ul class="nav-links">
-        <li><a href="#problem">Problem</a></li>
-        <li><a href="#solution">Our Solution</a></li>
-        <li><a href="#personas">Personas</a></li>
-        <li><a href="#demos">Demos</a></li>
+      <a class="brand" href="#top" aria-label="TypeGo home">Type<em>Go</em></a>
+      <ul class="nav-toc">
+        <li><a href="#problem"><span class="n">§1</span> Problem</a></li>
+        <li><a href="#method"><span class="n">§2</span> Method</a></li>
+        <li><a href="#personas"><span class="n">§3</span> Personas</a></li>
+        <li><a href="#behavior"><span class="n">§4</span> Behavior</a></li>
       </ul>
-      <a class="nav-cta" href="https://github.com/typefly/TypeFly" target="_blank" rel="noopener" aria-label="GitHub repository">
+      <a class="nav-src" href="https://github.com/typefly/TypeFly" target="_blank" rel="noopener" aria-label="Source on GitHub">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.79 2.74 1.28 3.4.98.11-.76.41-1.28.74-1.57-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.42.36.8 1.08.8 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
-        <span>GitHub</span>
+        <span>Source</span>
       </a>
     </nav>
   </header>
 
-  <!-- Hero -->
-  <section class="hero">
-    <div class="hero-orbs" aria-hidden="true">
-      <div class="orb o1"></div>
-      <div class="orb o2"></div>
-      <div class="orb o3"></div>
-    </div>
+  <main>
 
-    <div class="hero-inner">
-      <span class="hero-badge" data-reveal><span class="dot"></span> Asynchronous multi-agent robot control</span>
-      <h1 data-reveal style="--i:1">Type<span class="go">Go</span><span class="caret" aria-hidden="true"></span></h1>
-      <p class="subtitle" data-reveal style="--i:2">Give Your Robot a Personality</p>
-      <p class="tagline" data-reveal style="--i:3">Translate natural-language stories into robot personalities and behaviors — powered by asynchronous LLM agents that convert narratives into internal configurations to control how your robot acts.</p>
+    <!-- Hero: the Personality Engine × Score -->
+    <section class="hero">
+      <div class="wrap">
+        <div class="hero-intro">
+          <p class="eyebrow" data-reveal>// asynchronous multi-agent robot control</p>
+          <h1 data-reveal style="--i:1">Type<em>Go</em></h1>
+          <p class="hero-sub" data-reveal style="--i:2">Give your robot a personality.</p>
+          <p class="hero-lede" data-reveal style="--i:3">A written story compiles into a personality, then into behavior — asynchronous LLM agents translate the narrative into the configuration that drives how your robot acts.</p>
+          <div class="cta-row" data-reveal style="--i:4">
+            <a class="btn primary" href="#personas">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
+              Watch the demos
+            </a>
+            <a class="btn ghost" href="https://github.com/typefly/TypeFly" target="_blank" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
+              View source
+            </a>
+          </div>
+        </div>
 
-      <div class="cta-row" data-reveal style="--i:4">
-        <a class="btn primary" href="#personas">
-          <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          Watch Demos
-        </a>
-        <a class="btn ghost" href="https://github.com/typefly/TypeFly" target="_blank" rel="noopener">
-          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.58 2 12.25c0 4.53 2.87 8.37 6.84 9.73.5.1.68-.22.68-.49 0-.24-.01-.87-.01-1.71-2.78.62-3.37-1.37-3.37-1.37-.45-1.18-1.11-1.5-1.11-1.5-.91-.64.07-.62.07-.62 1 .07 1.53 1.06 1.53 1.06.89 1.56 2.34 1.11 2.91.85.09-.66.35-1.11.63-1.37-2.22-.26-4.56-1.14-4.56-5.06 0-1.12.39-2.03 1.03-2.75-.1-.26-.45-1.3.1-2.71 0 0 .84-.28 2.75 1.05a9.4 9.4 0 0 1 5 0c1.91-1.33 2.75-1.05 2.75-1.05.55 1.41.2 2.45.1 2.71.64.72 1.03 1.63 1.03 2.75 0 3.93-2.35 4.79-4.58 5.05.36.32.68.94.68 1.9 0 1.37-.01 2.47-.01 2.81 0 .27.18.6.69.49A10.03 10.03 0 0 0 22 12.25C22 6.58 17.52 2 12 2z"/></svg>
-          View on GitHub
-        </a>
+        <div class="instrument" id="engine" data-reveal style="--i:5">
+          <div class="inst-top">
+            <span class="play">▶ PLAY</span>
+            <span class="inst-title">story → personality → agents</span>
+            <span class="live"><i></i> LIVE</span>
+          </div>
+          <div class="inst-select">
+            <span class="sel-label">// select persona</span>
+            <div class="toggle" role="group" aria-label="Choose persona">
+              <button type="button" class="on" data-persona="toto">Toto</button><button type="button" data-persona="nana">Nana</button>
+            </div>
+          </div>
+          <div class="engine-grid">
+            <div class="col in">
+              <div class="col-h">input · story.txt</div>
+              <div class="story" id="pe-story">A small, quick scamp who darts and skitters everywhere in fast little bursts, investigating everything and never settling on one thing.</div>
+            </div>
+            <div class="pipe" aria-hidden="true"><span class="pipe-l">compile</span><div class="pipe-track"><i></i><i></i><i></i></div></div>
+            <div class="col out">
+              <div class="col-h">output · persona.cfg</div>
+              <div class="trait"><div class="trait-l">Speed <span data-key="speed">92</span></div><div class="meter"><i data-bar="speed" style="width:92%"></i></div></div>
+              <div class="trait"><div class="trait-l">Curiosity <span data-key="curiosity">96</span></div><div class="meter"><i data-bar="curiosity" style="width:96%"></i></div></div>
+              <div class="trait"><div class="trait-l">Calm <span data-key="calm">20</span></div><div class="meter"><i data-bar="calm" style="width:20%"></i></div></div>
+              <div class="trait"><div class="trait-l">Caution <span data-key="caution">28</span></div><div class="meter"><i data-bar="caution" style="width:28%"></i></div></div>
+              <div class="chips" id="pe-chips"><span>dart</span><span>investigate</span><span>restless</span></div>
+            </div>
+          </div>
+          <div class="dispatch"><span>persona.cfg <b>dispatched to agents</b> ↓</span></div>
+          <div class="score">
+            <div class="rails">
+              <div class="lane l3"><div class="lane-l"><b>S3 · Scheduler</b><span class="hz">0.5 Hz</span></div><div class="rail"><div class="notes"></div></div></div>
+              <div class="lane l2"><div class="lane-l"><b>S2 · Task Decomposer</b><span class="hz">1 Hz</span></div><div class="rail"><div class="notes"></div></div></div>
+              <div class="lane l1"><div class="lane-l"><b>S1 · Action Planner</b><span class="hz">2 Hz</span></div><div class="rail"><div class="notes"></div></div></div>
+              <div class="lane l0"><div class="lane-l"><b>S0 · Reflex</b><span class="hz">50 Hz</span></div><div class="rail"><div class="notes"></div></div></div>
+              <div class="playhead" aria-hidden="true"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- §1 — The Problem -->
+    <section id="problem" class="wrap">
+      <div class="sec-head" data-reveal>
+        <span class="eyebrow">§1 · The Problem</span>
+        <h2>The typical LLM-based control loop</h2>
+        <p class="lead">The standard LLM planning-and-control loop is simple, but its structure imposes limits that prevent real-time, adaptive behavior:</p>
       </div>
 
-      <div class="hero-highlights" data-reveal style="--i:5">
-        <span class="pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          Low-Latency Execution
-        </span>
-        <span class="pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          Non-Blocking Pipeline
-        </span>
-        <span class="pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
-          Speculative Pipelining
-        </span>
-        <span class="pill">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          Multi-Task Concurrency
-        </span>
-      </div>
-
-      <div class="scroll-cue" data-reveal style="--i:6" aria-hidden="true">
-        <span>Scroll</span>
-        <span class="line"></span>
-      </div>
-    </div>
-  </section>
-
-  <!-- Problem Section -->
-  <section id="problem" class="problem-section">
-    <div class="wrap">
-      <div class="section-head" data-reveal>
-        <span class="eyebrow is-danger"><span class="idx">01</span> The Problem</span>
-        <h2>The Typical LLM-Based Control Loop</h2>
-        <p class="lead">
-          The standard LLM-based robot planning and control loop is straightforward, but it suffers from
-          fundamental limitations that prevent real-time, adaptive robot behavior:
-        </p>
-      </div>
-
-      <ol class="drawback-list">
-        <li data-reveal style="--i:0">
-          <div class="dbk-body"><strong>High latency:</strong> The robot must wait for a full LLM inference cycle before executing any action, making real-time responsiveness difficult.</div>
-        </li>
-        <li data-reveal style="--i:1">
-          <div class="dbk-body"><strong>Blocking execution:</strong> The entire pipeline stalls during LLM inference — the robot cannot react to new observations or interrupts mid-cycle.</div>
-        </li>
-        <li data-reveal style="--i:2">
-          <div class="dbk-body"><strong>No speculative execution:</strong> Actions cannot be pre-fetched or pipelined; the robot remains idle while the model is thinking.</div>
-        </li>
-        <li data-reveal style="--i:3">
-          <div class="dbk-body"><strong>Sequential, single-threaded planning:</strong> Only one planning request is processed at a time, preventing concurrent handling of multiple tasks or goals.</div>
-        </li>
-        <li data-reveal style="--i:4">
-          <div class="dbk-body"><strong>Context window bottleneck:</strong> All observations, memory, and system descriptions must be packed into a single LLM prompt, limiting the richness of state that can be represented.</div>
-        </li>
+      <ol class="enum" data-reveal>
+        <li><p class="t"><b>High latency.</b> The robot must wait for a full inference cycle before executing any action, making real-time responsiveness difficult.</p></li>
+        <li><p class="t"><b>Blocking execution.</b> The pipeline stalls during inference — the robot cannot react to new observations or interrupts mid-cycle.</p></li>
+        <li><p class="t"><b>No speculative execution.</b> Actions cannot be pre-fetched or pipelined; the robot idles while the model is thinking.</p></li>
+        <li><p class="t"><b>Sequential, single-threaded planning.</b> Only one planning request is handled at a time, preventing concurrent pursuit of multiple goals.</p></li>
+        <li><p class="t"><b>Context-window bottleneck.</b> All observations, memory, and system descriptions must fit a single prompt, limiting the richness of state that can be represented.</p></li>
       </ol>
 
-      <figure class="diagram-wrapper" data-reveal>
-        <div class="diagram-container">
-          <svg viewBox="0 0 770 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 1: the typical LLM-based robot planning and control loop, where an input task and observation feed a single LLM that produces a plan for the robot in a blocking sequence.">
+      <figure data-reveal>
+        <div class="diagram">
+          <svg class="fig-svg" viewBox="0 0 770 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 1: the typical LLM-based robot planning and control loop, where an input task and observation feed a single LLM that produces a plan for the robot in a blocking sequence.">
             <defs>
-              <linearGradient id="pBox" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#1c1a30"/>
-                <stop offset="1" stop-color="#111019"/>
-              </linearGradient>
-              <linearGradient id="pStroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#a89bff"/>
-                <stop offset="1" stop-color="#45e2c8"/>
-              </linearGradient>
-              <filter id="pGlow" x="-60%" y="-60%" width="220%" height="220%">
-                <feDropShadow dx="0" dy="0" stdDeviation="3.4" flood-color="#8b7bff" flood-opacity="0.45"/>
-              </filter>
-              <marker id="arrow" viewBox="0 0 10 6" refX="10" refY="3"
-                      markerWidth="10" markerHeight="6" orient="auto-start-reverse">
-                <path d="M0,0 L10,3 L0,6 Z" fill="#8b7bff"/>
+              <marker id="arrowP" viewBox="0 0 10 6" refX="9" refY="3" markerWidth="9" markerHeight="6" orient="auto-start-reverse">
+                <path class="amark" d="M0,0 L10,3 L0,6 Z"/>
               </marker>
             </defs>
-
-            <!-- Input Task -->
-            <rect x="15" y="25" width="120" height="80" rx="8"
-                  fill="url(#pBox)" stroke="url(#pStroke)" stroke-width="2" filter="url(#pGlow)"/>
-            <text x="75" y="72" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="16" font-weight="600">Input Task</text>
-
-            <!-- Box 1: Observation / Memory / System Desc., etc. -->
-            <rect x="175" y="25" width="250" height="80" rx="8"
-                  fill="url(#pBox)" stroke="url(#pStroke)" stroke-width="2" filter="url(#pGlow)"/>
-            <text text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="16" font-weight="600">
-              <tspan x="300" y="58">Observation / Memory /</tspan>
-              <tspan x="300" dy="22">System Desc., etc.</tspan>
-            </text>
-
-            <!-- Box 2: LLM -->
-            <rect x="475" y="25" width="110" height="80" rx="8"
-                  fill="url(#pBox)" stroke="url(#pStroke)" stroke-width="2" filter="url(#pGlow)"/>
-            <text x="530" y="72" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">LLM</text>
-
-            <!-- Box 3: Plan -->
-            <rect x="635" y="25" width="110" height="80" rx="8"
-                  fill="url(#pBox)" stroke="url(#pStroke)" stroke-width="2" filter="url(#pGlow)"/>
-            <text x="690" y="72" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">Plan</text>
-
-            <!-- Box 4: Robot -->
-            <rect x="460" y="200" width="130" height="80" rx="8"
-                  fill="url(#pBox)" stroke="url(#pStroke)" stroke-width="2" filter="url(#pGlow)"/>
-            <text x="525" y="247" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">Robot</text>
-
-            <!-- Arrow: Input Task → Observation -->
-            <line x1="135" y1="65" x2="175" y2="65"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow)"/>
-
-            <!-- Arrow 1: Observation → LLM -->
-            <line x1="425" y1="65" x2="475" y2="65"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow)"/>
-
-            <!-- Arrow 2: LLM → Plan -->
-            <line x1="585" y1="65" x2="635" y2="65"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow)"/>
-
-            <!-- Arrow 3: Plan → Robot (down then left) -->
-            <path d="M690,105 L690,240 L590,240" fill="none"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow)"/>
-
-            <!-- Arrow 4: Robot → Observation (left then up) -->
-            <path d="M460,240 L300,240 L300,105" fill="none"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow)"/>
+            <rect class="fnode" x="15" y="25" width="120" height="80" rx="6"/>
+            <text class="flabel" x="75" y="70" text-anchor="middle" font-size="16">Input Task</text>
+            <rect class="fnode" x="175" y="25" width="250" height="80" rx="6"/>
+            <text class="flabel" text-anchor="middle" font-size="15"><tspan x="300" y="58">Observation / Memory /</tspan><tspan x="300" dy="21">System Desc., etc.</tspan></text>
+            <rect class="fnode" x="475" y="25" width="110" height="80" rx="6"/>
+            <text class="flabel" x="530" y="70" text-anchor="middle" font-size="18">LLM</text>
+            <rect class="fnode" x="635" y="25" width="110" height="80" rx="6"/>
+            <text class="flabel" x="690" y="70" text-anchor="middle" font-size="18">Plan</text>
+            <rect class="fnode" x="460" y="200" width="130" height="80" rx="6"/>
+            <text class="flabel" x="525" y="245" text-anchor="middle" font-size="18">Robot</text>
+            <line class="farrow" x1="135" y1="65" x2="171" y2="65" marker-end="url(#arrowP)"/>
+            <line class="farrow" x1="425" y1="65" x2="471" y2="65" marker-end="url(#arrowP)"/>
+            <line class="farrow" x1="585" y1="65" x2="631" y2="65" marker-end="url(#arrowP)"/>
+            <path class="farrow" d="M690,105 L690,240 L594,240" marker-end="url(#arrowP)"/>
+            <path class="farrow" d="M460,240 L300,240 L300,109" marker-end="url(#arrowP)"/>
           </svg>
         </div>
-        <figcaption class="diagram-caption"><b>Figure 1</b> — Typical LLM-based robot planning and control loop</figcaption>
+        <figcaption><span class="fnum">Figure 1.</span> The typical LLM-based robot planning and control loop — a single, blocking sequence.</figcaption>
       </figure>
-    </div>
-  </section>
+    </section>
 
-  <!-- Solution / Advantages Section -->
-  <section id="solution" class="solution-section">
-    <div class="wrap">
-      <div class="solution-header" data-reveal>
-        <span class="eyebrow"><span class="idx">02</span> Our Solution</span>
-        <h2>Asynchronous <span class="grad">Multi-Agent Architecture</span></h2>
-        <p>Each agent runs at its own independent update frequency, directly addressing every limitation of the typical loop.</p>
+    <!-- §2 — The Method -->
+    <section id="method" class="wrap">
+      <div class="sec-head" data-reveal>
+        <span class="eyebrow">§2 · The Method</span>
+        <h2>An asynchronous <em>multi-agent</em> architecture</h2>
+        <p class="lead">Each agent runs at its own independent update frequency, directly addressing every limitation of the typical loop.</p>
       </div>
 
-      <div class="advantage-grid">
-        <div class="advantage-card" data-reveal style="--i:0">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-          </div>
-          <h3>Low-Latency Action Execution</h3>
-          <p>Reactive agents operate at high frequency without waiting for slow LLM inference, enabling immediate responses to environmental changes.</p>
-        </div>
+      <div class="props" data-reveal>
+        <div class="prop"><div class="rn">i.</div><div><h3>Low-latency action execution</h3><p>Reactive agents operate at high frequency without waiting on slow inference, enabling immediate responses to environmental change.</p></div></div>
+        <div class="prop"><div class="rn">ii.</div><div><h3>Non-blocking pipeline</h3><p>Observation, planning, and execution run concurrently rather than in sequence, keeping the robot continuously active.</p></div></div>
+        <div class="prop"><div class="rn">iii.</div><div><h3>Speculative action pipelining</h3><p>The planner issues upcoming actions ahead of time, so the robot executes them the moment the current action completes — minimal idle time.</p></div></div>
+        <div class="prop"><div class="rn">iv.</div><div><h3>Concurrent multi-task handling</h3><p>Independent agents manage multiple goals at once, with a priority-based scheduler arbitrating between them in real time.</p></div></div>
+      </div>
 
-        <div class="advantage-card" data-reveal style="--i:1">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
-          </div>
-          <h3>Non-Blocking Pipeline</h3>
-          <p>Agents run concurrently — observation, planning, and execution proceed in parallel rather than sequentially, keeping the robot continuously active.</p>
-        </div>
-
-        <div class="advantage-card" data-reveal style="--i:2">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
-          </div>
-          <h3>Speculative Action Pipelining</h3>
-          <p>The planner speculatively issues upcoming actions ahead of time, so the robot executes them as soon as the current action completes with minimal idle time.</p>
-        </div>
-
-        <div class="advantage-card" data-reveal style="--i:3">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
-          </div>
-          <h3>Concurrent Multi-Task Handling</h3>
-          <p>Independent agents manage multiple goals simultaneously, with a priority-based scheduler arbitrating between them in real time.</p>
-        </div>
-
-        <div class="advantage-card highlight" data-reveal style="--i:4">
-          <div class="card-icon">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m8.66-15l-5.2 3m-6.92 4l-5.2 3m14.14 0l-5.2-3m-6.92-4l-5.2-3"/></svg>
-          </div>
-          <div>
-            <h3>Distributed Context Management</h3>
-            <p>Each agent maintains its own focused context, avoiding the single-prompt bottleneck and allowing richer, more specialized representations of state.</p>
-          </div>
+      <div class="remark" data-reveal>
+        <div class="rn">v.</div>
+        <div>
+          <span class="tag">Remark</span>
+          <h3>Distributed context management</h3>
+          <p>Each agent maintains its own focused context, avoiding the single-prompt bottleneck and allowing richer, more specialized representations of state.</p>
         </div>
       </div>
 
-      <figure class="diagram-wrapper solution-diagram" data-reveal>
-        <div class="diagram-container">
-          <svg viewBox="0 0 850 530" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 2: the TypeGo asynchronous multi-agent architecture, where observation feeds an S3 scheduler and task-specific S2 and S1 agents that each run at independent update frequencies, producing high-level plans and function calls to drive the robot in a continuous feedback loop.">
+      <figure data-reveal>
+        <div class="diagram wide">
+          <svg class="fig-svg" viewBox="0 0 900 540" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Figure 2: the TypeGo asynchronous multi-agent architecture. Observation feeds a distribution bus into four agents that each run at their own update frequency — an S3 scheduler over an S2 task decomposer and S1 action planner that produce a plan for the robot, plus an S0 reflex agent that bypasses planning to control the robot directly. The robot's state feeds back to observation.">
             <defs>
-              <linearGradient id="sBox" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0" stop-color="#1c1a30"/>
-                <stop offset="1" stop-color="#111019"/>
-              </linearGradient>
-              <linearGradient id="sStroke" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#a89bff"/>
-                <stop offset="0.55" stop-color="#6ea8ff"/>
-                <stop offset="1" stop-color="#45e2c8"/>
-              </linearGradient>
-              <filter id="sGlow" x="-60%" y="-60%" width="220%" height="220%">
-                <feDropShadow dx="0" dy="0" stdDeviation="3.4" flood-color="#8b7bff" flood-opacity="0.45"/>
-              </filter>
-              <marker id="arrow2" viewBox="0 0 10 6" refX="10" refY="3"
-                      markerWidth="10" markerHeight="6" orient="auto">
-                <path d="M0,0 L10,3 L0,6 Z" fill="#8b7bff"/>
+              <marker id="arrowS" viewBox="0 0 10 6" refX="9" refY="3" markerWidth="9" markerHeight="6" orient="auto">
+                <path class="amark" d="M0,0 L10,3 L0,6 Z"/>
               </marker>
-              <!-- Async circular-arrow icon (rotate-cw) -->
+              <marker id="arrowV" viewBox="0 0 10 6" refX="9" refY="3" markerWidth="9" markerHeight="6" orient="auto">
+                <path class="amarkV" d="M0,0 L10,3 L0,6 Z"/>
+              </marker>
               <symbol id="async" viewBox="0 0 24 24">
-                <polyline points="23,4 23,10 17,10" fill="none" stroke="#8b7bff"
-                          stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
-                <path d="M20.49,15 A9,9 0 1,1 18.37,5.64 L23,10" fill="none"
-                      stroke="#8b7bff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                <polyline points="23,4 23,10 17,10" fill="none" stroke="#1fe0c0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M20.49,15 A9,9 0 1,1 18.37,5.64 L23,10" fill="none" stroke="#1fe0c0" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
               </symbol>
             </defs>
 
-            <!-- ── Input Task Block ── -->
-            <rect x="20" y="150" width="120" height="80" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text x="80" y="196" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="16" font-weight="600">Input Task</text>
+            <rect class="fnode" x="28" y="236" width="120" height="60" rx="6"/>
+            <text class="flabel" x="88" y="271" text-anchor="middle" font-size="15">Input Task</text>
 
-            <!-- ── Observation Block ── -->
-            <rect x="185" y="150" width="240" height="80" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="16" font-weight="600">
-              <tspan x="305" y="183">Observation / Memory /</tspan>
-              <tspan x="305" dy="22">System Desc., etc.</tspan>
-            </text>
-            <use href="#async" x="403" y="208" width="20" height="20"/>
+            <rect class="fnode" x="196" y="220" width="200" height="94" rx="6"/>
+            <text class="flabel" text-anchor="middle" font-size="15"><tspan x="296" y="258">Observation / Memory /</tspan><tspan x="296" dy="21">System Desc., etc.</tspan></text>
 
-            <!-- ── S3 — Scheduler Block ── -->
-            <rect x="500" y="15" width="130" height="85" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text x="565" y="55" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">S3</text>
-            <text x="565" y="75" text-anchor="middle" fill="#aeb0c8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="12">Scheduler</text>
-            <use href="#async" x="610" y="80" width="18" height="18"/>
+            <path class="farrow" d="M396,267 L452,267" fill="none"/>
+            <path class="farrow" d="M452,68 L452,383" fill="none"/>
+            <line class="farrow" x1="452" y1="68"  x2="484" y2="68"  marker-end="url(#arrowS)"/>
+            <line class="farrow" x1="452" y1="179" x2="484" y2="179" marker-end="url(#arrowS)"/>
+            <line class="farrow" x1="452" y1="265" x2="484" y2="265" marker-end="url(#arrowS)"/>
+            <line class="farrow" x1="452" y1="383" x2="484" y2="383" marker-end="url(#arrowS)"/>
 
-            <!-- ── Task-Specific Wrapper ── -->
-            <rect x="480" y="135" width="170" height="265" rx="10"
-                  fill="none" stroke="#3c3c50" stroke-width="2" stroke-dasharray="8 4"/>
-            <text x="565" y="153" text-anchor="middle" fill="#8a86a8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="12" font-style="italic">Task-Specific</text>
+            <rect class="fnode" x="486" y="40" width="156" height="56" rx="6"/>
+            <text class="flabel" x="564" y="64" text-anchor="middle" font-size="17">S3</text>
+            <text class="fsub" x="564" y="82" text-anchor="middle" font-size="11">Scheduler</text>
+            <use href="#async" x="615" y="47" width="15" height="15"/>
 
-            <!-- ── S2 Block (inside wrapper) ── -->
-            <rect x="505" y="170" width="120" height="85" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text x="565" y="218" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">S2</text>
-            <use href="#async" x="605" y="233" width="18" height="18"/>
+            <rect class="fdash" x="468" y="120" width="192" height="196" rx="9"/>
+            <text class="fannot" x="564" y="138" text-anchor="middle" font-size="11">Process</text>
 
-            <!-- ── S1 Block (inside wrapper) ── -->
-            <rect x="505" y="305" width="120" height="85" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text x="565" y="353" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">S1</text>
-            <use href="#async" x="605" y="368" width="18" height="18"/>
+            <rect class="fnode" x="486" y="150" width="156" height="58" rx="6"/>
+            <text class="flabel" x="564" y="176" text-anchor="middle" font-size="17">S2</text>
+            <text class="fsub" x="564" y="195" text-anchor="middle" font-size="11">Task Decomposer</text>
+            <use href="#async" x="615" y="157" width="15" height="15"/>
 
-            <!-- ── Plan Block (right of S1) ── -->
-            <rect x="720" y="305" width="120" height="85" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text x="780" y="353" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">Plan</text>
+            <rect class="fnode" x="486" y="236" width="156" height="58" rx="6"/>
+            <text class="flabel" x="564" y="262" text-anchor="middle" font-size="17">S1</text>
+            <text class="fsub" x="564" y="281" text-anchor="middle" font-size="11">Action Planner</text>
+            <use href="#async" x="615" y="243" width="15" height="15"/>
 
-            <!-- ── Robot Block (below) ── -->
-            <rect x="500" y="460" width="130" height="70" rx="8"
-                  fill="url(#sBox)" stroke="url(#sStroke)" stroke-width="2" filter="url(#sGlow)"/>
-            <text x="565" y="501" text-anchor="middle" fill="#f3f3f8"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="18" font-weight="600">Robot</text>
+            <rect class="fnode" x="486" y="352" width="156" height="60" rx="6"/>
+            <text class="flabel" x="564" y="379" text-anchor="middle" font-size="17">S0</text>
+            <text class="fsub" x="564" y="398" text-anchor="middle" font-size="11">Reflex</text>
+            <use href="#async" x="615" y="359" width="15" height="15"/>
 
-            <!-- ── Arrow: Input Task → Observation ── -->
-            <line x1="140" y1="190" x2="185" y2="190"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
+            <rect class="fnode" x="712" y="236" width="128" height="58" rx="6"/>
+            <text class="flabel" x="776" y="271" text-anchor="middle" font-size="17">Plan</text>
 
-            <!-- ── Arrows from Observation ── -->
-            <!-- Obs → S3 -->
-            <line x1="425" y1="170" x2="500" y2="57"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
-            <!-- Obs → S2 -->
-            <line x1="425" y1="187" x2="505" y2="212"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
-            <!-- Obs → S1 -->
-            <line x1="425" y1="210" x2="505" y2="347"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
+            <rect class="fnode" x="486" y="452" width="156" height="60" rx="6"/>
+            <text class="flabel" x="564" y="488" text-anchor="middle" font-size="17">Robot</text>
 
-            <!-- ── S3 → Wrapper (schedules) ── -->
-            <line x1="565" y1="100" x2="565" y2="135"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
-            <text x="610" y="122" text-anchor="start" fill="#9a95c0"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="11" font-style="italic">schedules</text>
+            <line class="farrow" x1="148" y1="266" x2="192" y2="266" marker-end="url(#arrowS)"/>
 
-            <!-- ── S2 → S1 (High-Level Plan) ── -->
-            <line x1="565" y1="255" x2="565" y2="305"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
-            <text x="610" y="285" text-anchor="start" fill="#cfcbe6"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="12">High-Level Plan</text>
+            <line class="farrow" x1="564" y1="96" x2="564" y2="116" marker-end="url(#arrowS)"/>
+            <text class="fannot" x="574" y="112" text-anchor="start" font-size="10.5">schedules</text>
 
-            <!-- ── S1 → Plan (Function Calls) ── -->
-            <line x1="625" y1="350" x2="720" y2="350"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
-            <text x="672" y="338" text-anchor="middle" fill="#cfcbe6"
-                  font-family="'Space Grotesk', sans-serif"
-                  font-size="12">Function Calls</text>
+            <line class="farrow" x1="564" y1="208" x2="564" y2="232" marker-end="url(#arrowS)"/>
+            <text class="fannot em" x="668" y="226" text-anchor="start" font-size="11">High-Level Plan</text>
 
-            <!-- ── Plan → Robot (down then left) ── -->
-            <path d="M780,390 L780,495 L630,495" fill="none"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
+            <line class="farrow" x1="642" y1="265" x2="708" y2="265" marker-end="url(#arrowS)"/>
+            <text class="fannot em" x="675" y="255" text-anchor="middle" font-size="11">Function Calls</text>
 
-            <!-- ── Robot → Observation (feedback loop) ── -->
-            <path d="M500,495 L300,495 L300,230" fill="none"
-                  stroke="#8b7bff" stroke-width="2" marker-end="url(#arrow2)"/>
+            <path class="farrow" d="M776,294 L776,482 L644,482" fill="none" marker-end="url(#arrowS)"/>
+
+            <path class="freflex" d="M564,412 L564,449" marker-end="url(#arrowV)"/>
+            <text class="fannot reflex" x="574" y="437" text-anchor="start" font-size="10.5">reflex handler</text>
+
+            <path class="farrow" d="M486,482 L160,482 L160,336 L296,336 L296,316" fill="none" marker-end="url(#arrowS)"/>
+            <text class="fannot" x="168" y="470" text-anchor="start" font-size="10.5">feedback</text>
           </svg>
         </div>
-        <figcaption class="diagram-caption"><b>Figure 2</b> — TypeGo system: asynchronous multi-agent architecture with independent update frequencies.</figcaption>
+        <figcaption><span class="fnum">Figure 2.</span> The TypeGo system — an asynchronous multi-agent architecture in which each agent runs at its own independent update frequency.</figcaption>
       </figure>
-    </div>
-  </section>
+    </section>
 
-  <!-- Personalized Control -->
-  <section id="personas" class="persona-section">
-    <div class="wrap">
-      <div class="persona-header" data-reveal>
-        <span class="eyebrow"><span class="idx">03</span> Personalized Control</span>
-        <h2>Same Task, <span class="grad">Different Personalities</span></h2>
-        <p>TypeGo turns a short written story into a robot's personality. Give two personas the exact same command and each one carries it out in its own unmistakable style.</p>
+    <!-- §3 — Personalized Control -->
+    <section id="personas" class="wrap">
+      <div class="sec-head" data-reveal>
+        <span class="eyebrow">§3 · Personalized Control</span>
+        <h2>Same task, <em>different personalities</em></h2>
+        <p class="lead">TypeGo compiles a short written story into a robot's personality. Give two personas the exact same command, and each carries it out in its own unmistakable style.</p>
       </div>
 
-      <div class="task-banner" data-reveal>
-        <span class="task-label">Shared Task</span>
-        <span class="task-cmd">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-          Find and follow the person
-        </span>
+      <div class="task-note" data-reveal>
+        <span class="inner"><span class="lbl">Task</span><span class="cmd">$ find_and_follow --target person</span></span>
       </div>
 
-      <div class="persona-grid">
-
-        <article class="persona-card persona-toto" data-reveal style="--i:0">
-          <div class="persona-head">
-            <div class="persona-avatar">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16.5" rx="4.3" ry="3.4"/><circle cx="6.4" cy="11" r="1.95"/><circle cx="10" cy="7.8" r="1.95"/><circle cx="14" cy="7.8" r="1.95"/><circle cx="17.6" cy="11" r="1.95"/></svg>
-            </div>
-            <div class="persona-id">
-              <span class="persona-badge">Persona A</span>
-              <h3 class="persona-name">Toto</h3>
-            </div>
-          </div>
-          <blockquote class="persona-story">A small, quick scamp who darts and skitters everywhere in fast little bursts, investigating everything and never settling on one thing.</blockquote>
-          <div class="persona-traits">
-            <span class="trait">Fast</span>
-            <span class="trait">Curious</span>
-            <span class="trait">Restless</span>
-          </div>
-          <div class="persona-video">
-            <video src="assets/follow__toto.mp4" controls muted loop playsinline preload="metadata"></video>
-          </div>
+      <div class="panels">
+        <article class="panel" data-reveal>
+          <span class="p-badge">Persona A</span>
+          <div class="p-head"><span class="p-name">Toto</span><span class="p-role">Fast · Curious · Restless</span></div>
+          <blockquote>A small, quick scamp who darts and skitters everywhere in fast little bursts, investigating everything and never settling on one thing.</blockquote>
+          <div class="traits"><span>dart</span><span>investigate</span><span>restless</span></div>
+          <div class="p-video"><div class="frame"><video src="assets/follow__toto.mp4" controls muted loop playsinline preload="metadata"></video></div></div>
         </article>
-
-        <article class="persona-card persona-nana" data-reveal style="--i:1">
-          <div class="persona-head">
-            <div class="persona-avatar">
-              <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><ellipse cx="12" cy="16.5" rx="4.3" ry="3.4"/><circle cx="6.4" cy="11" r="1.95"/><circle cx="10" cy="7.8" r="1.95"/><circle cx="14" cy="7.8" r="1.95"/><circle cx="17.6" cy="11" r="1.95"/></svg>
-            </div>
-            <div class="persona-id">
-              <span class="persona-badge">Persona B</span>
-              <h3 class="persona-name">Nana</h3>
-            </div>
-          </div>
-          <blockquote class="persona-story">A gentle nursemaid dog who makes calm, dutiful rounds — moving smoothly to tidy, herd, and check on the people in her care.</blockquote>
-          <div class="persona-traits">
-            <span class="trait">Calm</span>
-            <span class="trait">Dutiful</span>
-            <span class="trait">Watchful</span>
-          </div>
-          <div class="persona-video">
-            <video src="assets/follow__nana.mp4" controls muted loop playsinline preload="metadata"></video>
-          </div>
+        <article class="panel" data-reveal style="--i:1">
+          <span class="p-badge">Persona B</span>
+          <div class="p-head"><span class="p-name">Nana</span><span class="p-role">Calm · Dutiful · Watchful</span></div>
+          <blockquote>A gentle nursemaid who makes calm, dutiful rounds — moving smoothly to tidy, herd, and check on the people in her care.</blockquote>
+          <div class="traits"><span>patrol</span><span>tend</span><span>watchful</span></div>
+          <div class="p-video"><div class="frame"><video src="assets/follow__nana.mp4" controls muted loop playsinline preload="metadata"></video></div></div>
         </article>
-
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Exception Handling -->
-  <section id="demos" class="capa-section">
-    <div class="wrap">
-      <div class="capa-header" data-reveal>
-        <span class="eyebrow"><span class="idx">04</span> Exception Handling</span>
-        <h2>Handling the <span class="grad">Unexpected</span></h2>
-        <p>Because every agent runs asynchronously, the robot copes with interruptions two ways — deliberately switching between tasks, or reacting to a sudden event in an instant and then resuming.</p>
+    <!-- §4 — Exception Handling -->
+    <section id="behavior" class="wrap">
+      <div class="sec-head" data-reveal>
+        <span class="eyebrow">§4 · Exception Handling</span>
+        <h2>Handling the <em>unexpected</em></h2>
+        <p class="lead">Because every agent runs asynchronously, the robot copes with interruption two ways — deliberately switching between tasks, or reacting to a sudden event in an instant and then resuming.</p>
       </div>
 
-      <div class="capa-grid">
-
-        <article class="capa-card mode-deliberate" data-reveal style="--i:0">
-          <div class="capa-head">
-            <div class="capa-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
-            </div>
-            <div class="capa-id">
-              <span class="capa-badge">Deliberate</span>
-              <h3 class="capa-name">Switch Between Tasks</h3>
-            </div>
-          </div>
-          <p class="capa-desc">A person enters the scene, so the robot <b>deliberately</b> sets its current task aside, attends to the new priority, and switches context — a scheduled, arbitrated hand-off between goals.</p>
-          <div class="capa-video">
-            <video src="assets/exception-see-person.mp4" controls muted loop playsinline preload="metadata"></video>
-          </div>
+      <div class="panels">
+        <article class="panel" data-reveal>
+          <span class="p-badge">Deliberate</span>
+          <div class="p-head"><span class="p-name">Switch between tasks</span></div>
+          <p class="p-desc">A person enters the scene, so the robot <b>deliberately</b> sets its current task aside, attends to the new priority, and switches context — a scheduled, arbitrated hand-off between goals.</p>
+          <div class="p-video"><div class="frame"><video src="assets/exception-see-person.mp4" controls muted loop playsinline preload="metadata"></video></div></div>
         </article>
-
-        <article class="capa-card mode-reactive" data-reveal style="--i:1">
-          <div class="capa-head">
-            <div class="capa-avatar">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10"/></svg>
-            </div>
-            <div class="capa-id">
-              <span class="capa-badge">Reactive</span>
-              <h3 class="capa-name">React Fast &amp; Resume</h3>
-            </div>
-          </div>
-          <p class="capa-desc">A sudden external event triggers a <b>reflexive</b>, low-latency response — the robot reacts to the person and plays with the ball in real time, then resumes what it was doing without a full planning cycle.</p>
-          <div class="capa-video">
-            <video src="assets/play-with-ball.mp4" controls muted loop playsinline preload="metadata"></video>
-          </div>
+        <article class="panel" data-reveal style="--i:1">
+          <span class="p-badge">Reactive</span>
+          <div class="p-head"><span class="p-name">React fast &amp; resume</span></div>
+          <p class="p-desc">A sudden external event triggers a <b>reflexive</b>, low-latency response — the robot reacts and plays with the ball in real time, then resumes what it was doing without a full planning cycle.</p>
+          <div class="p-video"><div class="frame"><video src="assets/play-with-ball.mp4" controls muted loop playsinline preload="metadata"></video></div></div>
         </article>
-
       </div>
-    </div>
-  </section>
+    </section>
 
-  <!-- Footer -->
+  </main>
+
   <footer>
-    <div class="footer-inner" data-reveal>
-      <div class="footer-brand">Type<span>Go</span></div>
-      <p class="footer-tag">Give Your Robot a Personality</p>
-      <div class="footer-links">
+    <div class="colophon" data-reveal>
+      <div class="mark">Type<em>Go</em></div>
+      <p class="tag">Give your robot a personality.</p>
+      <div class="src">
         <a href="https://github.com/typefly/TypeFly" target="_blank" rel="noopener">
           <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .5A11.5 11.5 0 0 0 .5 12a11.5 11.5 0 0 0 7.86 10.92c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.53-1.34-1.3-1.7-1.3-1.7-1.06-.72.08-.71.08-.71 1.17.08 1.78 1.2 1.78 1.2 1.04 1.79 2.74 1.28 3.4.98.11-.76.41-1.28.74-1.57-2.55-.29-5.24-1.28-5.24-5.68 0-1.26.45-2.28 1.19-3.09-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18a11 11 0 0 1 5.8 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.83 1.19 3.09 0 4.41-2.69 5.38-5.25 5.67.42.36.8 1.08.8 2.18v3.23c0 .31.21.67.8.56A11.5 11.5 0 0 0 23.5 12 11.5 11.5 0 0 0 12 .5Z"/></svg>
-          GitHub Repository
+          Source &amp; documentation
         </a>
       </div>
-      <p class="footer-copy">&copy; 2026 TypeGo</p>
+      <div class="set">Set in Archivo &amp; JetBrains Mono.<span class="dot">·</span>&copy; 2026 TypeGo</div>
     </div>
   </footer>
 
   <script>
     (function () {
       "use strict";
+      var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
-      // Nav elevation on scroll
+      /* nav hairline on scroll */
       var nav = document.querySelector(".nav-wrap");
-      var onScroll = function () {
-        if (nav) nav.classList.toggle("scrolled", window.scrollY > 8);
-      };
+      var onScroll = function () { if (nav) nav.classList.toggle("scrolled", window.scrollY > 8); };
       onScroll();
       window.addEventListener("scroll", onScroll, { passive: true });
 
-      // Scroll reveal — robust: any failure falls back to showing all content
+      /* scroll reveal — fails open */
       var items = document.querySelectorAll("[data-reveal]");
-      var revealAll = function () {
-        for (var i = 0; i < items.length; i++) items[i].classList.add("is-visible");
-      };
+      var revealAll = function () { for (var i = 0; i < items.length; i++) items[i].classList.add("is-visible"); };
       try {
-        var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        if (reduce || !("IntersectionObserver" in window)) {
-          revealAll();
-          return;
+        if (reduce || !("IntersectionObserver" in window)) { revealAll(); }
+        else {
+          var io = new IntersectionObserver(function (es) {
+            es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add("is-visible"); io.unobserve(e.target); } });
+          }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+          items.forEach(function (el) { io.observe(el); });
         }
-        var io = new IntersectionObserver(function (entries) {
-          entries.forEach(function (e) {
-            if (e.isIntersecting) {
-              e.target.classList.add("is-visible");
-              io.unobserve(e.target);
-            }
-          });
-        }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
-        items.forEach(function (el) { io.observe(el); });
-      } catch (err) {
-        revealAll();
-      }
+      } catch (err) { revealAll(); }
+
+      /* the Personality Engine — story compiles into a persona that retunes the agent tracks */
+      try {
+        var PERSONA = {
+          toto: { story: "A small, quick scamp who darts and skitters everywhere in fast little bursts, investigating everything and never settling on one thing.",
+                  speed: 92, curiosity: 96, calm: 20, caution: 28, chips: ["dart", "investigate", "restless"],
+                  score: { l3: [100, "5s"], l2: [48, "2.1s"], l1: [20, "0.85s"], l0: [12, "0.4s"] } },
+          nana: { story: "A gentle nursemaid who makes calm, dutiful rounds — moving smoothly to tidy, herd, and check on the people in her care.",
+                  speed: 38, curiosity: 44, calm: 92, caution: 86, chips: ["patrol", "tend", "watchful"],
+                  score: { l3: [150, "8s"], l2: [82, "4.4s"], l1: [36, "2.1s"], l0: [22, "0.7s"] } }
+        };
+        var root = document.getElementById("engine");
+        if (root) {
+          var storyEl = document.getElementById("pe-story");
+          var chipsEl = document.getElementById("pe-chips");
+          var bars = root.querySelectorAll("[data-bar]");
+          var vals = root.querySelectorAll("[data-key]");
+          var btns = root.querySelectorAll(".toggle button");
+          var typer = null;
+          var setScore = function (p) {
+            ["l3", "l2", "l1", "l0"].forEach(function (k) {
+              var lane = root.querySelector(".lane." + k); if (!lane) return;
+              lane.style.setProperty("--gap", p.score[k][0] + "px");
+              var notes = lane.querySelector(".notes"); if (notes) notes.style.animationDuration = p.score[k][1];
+            });
+          };
+          var type = function (text) {
+            if (typer) { clearInterval(typer); typer = null; }
+            if (reduce) { storyEl.textContent = text; return; }
+            storyEl.innerHTML = '<span class="ln"></span><span class="cur">▌</span>';
+            var ln = storyEl.querySelector(".ln"), i = 0;
+            typer = setInterval(function () { ln.textContent = text.slice(0, i++); if (i > text.length) { clearInterval(typer); typer = null; } }, 22);
+          };
+          var load = function (name, doType) {
+            var p = PERSONA[name]; if (!p) return;
+            btns.forEach(function (b) { b.classList.toggle("on", b.getAttribute("data-persona") === name); });
+            if (doType) { type(p.story); } else { storyEl.textContent = p.story; }
+            bars.forEach(function (b) { b.style.width = p[b.getAttribute("data-bar")] + "%"; });
+            vals.forEach(function (v) { v.textContent = p[v.getAttribute("data-key")]; });
+            chipsEl.innerHTML = "";
+            p.chips.forEach(function (c) { var s = document.createElement("span"); s.textContent = c; chipsEl.appendChild(s); });
+            setScore(p);
+          };
+          btns.forEach(function (b) { b.addEventListener("click", function () { load(b.getAttribute("data-persona"), true); }); });
+          setScore(PERSONA.toto);
+          var started = false, start = function () { if (!started) { started = true; load("toto", true); } };
+          try {
+            var io2 = new IntersectionObserver(function (es) {
+              es.forEach(function (e) { if (e.isIntersecting) { start(); io2.disconnect(); } });
+            }, { threshold: 0.35 });
+            io2.observe(root);
+          } catch (e) { start(); }
+        }
+      } catch (err) {}
     })();
   </script>
 
